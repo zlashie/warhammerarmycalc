@@ -1,0 +1,10 @@
+import { Component } from '@angular/core';
+
+@Component({
+  standalone: true,
+  template: `
+    <h1>Warhammer Strategic Analyzer</h1>
+    <p>Welcome to the Forge. Select the Army Calculator to begin analyzing your output.</p>
+  `
+})
+export class HomeComponent {}
