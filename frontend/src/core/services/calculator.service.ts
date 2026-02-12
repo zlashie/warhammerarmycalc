@@ -3,14 +3,19 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environments';
 import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface CalculationRequest {
+  inputValue: number;
+}
+
+@Injectable({ providedIn: 'root' })
 export class CalculatorService {
   private http = inject(HttpClient);
-  private readonly apiUrl = environment.apiUrl;
+  private readonly apiUrl = `${environment.apiUrl}/calc`;
 
-getIncrement(value: number): Observable<number> {
-  return this.http.get<number>(`${this.apiUrl}/increment/${value}`);
-}
+  getIncrement(value: number): Observable<number> {
+    console.log('SERVICE RECEIVED VALUE:', value);
+    const payload = { inputValue: value }; 
+
+    return this.http.post<number>(`${this.apiUrl}/increment`, payload);
+  }
 }

@@ -3,16 +3,18 @@
   
   <div class="input-group">
     <label>Input Number:</label>
-    <input type="number" 
-           [ngModel]="numInput()" 
-           (ngModelChange)="numInput.set($event)">
+    <input 
+      type="number" 
+      [value]="numInput()" 
+      (input)="onInput($any($event.target).value)"
+    >
   </div>
 
   <div class="results">
-    @if (calc.isLoading()) {
-      <p class="status">Contacting Java 25 backend...</p>
-    } @else if (calc.value() !== undefined) {
-      <h3>Result: <span class="highlight">{{ calc.value() }}</span></h3>
+    @if (isLoading()) {
+      <p>Contacting Backend...</p>
+    } @else if (result() !== undefined) {
+      <h3>Result: <span class="highlight">{{ result() }}</span></h3>
     }
   </div>
 </section>
