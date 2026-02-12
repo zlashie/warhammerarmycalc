@@ -13,7 +13,6 @@ export class CalculatorService {
   private readonly apiUrl = `${environment.apiUrl}/calc`;
 
   getIncrement(value: number): Observable<number> {
-    console.log('SERVICE RECEIVED VALUE:', value);
     const payload = { inputValue: value }; 
 
     return this.http.post<number>(`${this.apiUrl}/increment`, payload);
