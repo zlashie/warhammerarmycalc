@@ -1,26 +1,20 @@
-import { Component, signal } from '@angular/core';
-import { httpResource } from '@angular/common/http';
+import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { CalculatorService } from '../../../core/services/calculator.service';
 
 @Component({
+  selector: 'app-army-calc',
   standalone: true,
   imports: [FormsModule],
-  template: `
-    <h2>Warhammer Army Calculator</h2>
-    <input type="number" 
-           [ngModel]="numInput()" 
-           (ngModelChange)="numInput.set($event)">
-    
-    @if (calc.isLoading()) {
-      <p>Contacting Java 25 backend...</p>
-    } @else if (calc.value() !== undefined) {
-      <h3>Result: {{ calc.value() }}</h3>
-    }
-  `
+  templateUrl: './army-calc.component.html',
+  styleUrls: ['./army-calc.component.css']
 })
 export class ArmyCalcComponent {
+  private calcService = inject(CalculatorService);
   numInput = signal(0);
-  calc = httpResource<number>(() => 
-    `http://localhost:8080/api/increment/${this.numInput()}`
-  );
+
+  calc = rxResource({
+    stream: () => this.calcService.getIncrement(this.numInput())
+  });
 }

@@ -1,0 +1,18 @@
+<section class="calculator-card">
+  <h2>Warhammer Army Calculator</h2>
+  
+  <div class="input-group">
+    <label>Input Number:</label>
+    <input type="number" 
+           [ngModel]="numInput()" 
+           (ngModelChange)="numInput.set($event)">
+  </div>
+
+  <div class="results">
+    @if (calc.isLoading()) {
+      <p class="status">Contacting Java 25 backend...</p>
+    } @else if (calc.value() !== undefined) {
+      <h3>Result: <span class="highlight">{{ calc.value() }}</span></h3>
+    }
+  </div>
+</section>

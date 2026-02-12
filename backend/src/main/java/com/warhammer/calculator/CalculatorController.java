@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:4200") // FE: 4200, BE: 8080
+@CrossOrigin(origins = "http://localhost:4200") 
 public class CalculatorController {
 
     @GetMapping("/increment/{num}")

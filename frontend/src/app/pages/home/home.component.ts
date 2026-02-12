@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 
 @Component({
+  selector: 'app-home',
   standalone: true,
-  template: `
-    <h1>Warhammer Strategic Analyzer</h1>
-    <p>Welcome to the Forge. Select the Army Calculator to begin analyzing your output.</p>
-  `
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
 })
 export class HomeComponent {}
