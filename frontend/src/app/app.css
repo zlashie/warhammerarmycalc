@@ -1,22 +1,16 @@
-.navbar {
-  padding: 1rem;
-  background: #1a1a1a;
-  color: white;
+@import "../styles.css";
+
+:host {
   display: flex;
-  gap: 20px;
-  border-bottom: 2px solid gold;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-.navbar a {
-  color: white;
-  text-decoration: none;
-}
-
-.active-link {
-  border-bottom: 2px solid gold;
-  font-weight: bold;
-}
-
-.container {
+.content-container {
+  flex: 1;
   padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }

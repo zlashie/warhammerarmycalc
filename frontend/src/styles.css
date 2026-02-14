@@ -1,1 +1,12 @@
-/* You can add global styles to this file, and also import other style files */
+:root{
+    --bg-main: #ffffff;
+    --bg-subtle: #f2f2f2; 
+
+    --text-main: #111111;
+    --text-muted: #666666;
+
+    --border-color: #eaeaea;
+    --modern-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    --font-family: 'Calibri', 'Candara', 'Segoe UI', sans-serif;
+}

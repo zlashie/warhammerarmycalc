@@ -1,10 +1,10 @@
-@import "../../../styles.css";
+@import "../../../../styles.css";
 
 .footer {
   border-top: 1px solid #eaeaea;
   padding: 2rem 0;
   background-color: #ffffff;
-  margin-top: auto;
+  margin-top: auto; /* Ensures it pushes to bottom in flex layouts */
 }
 
 .container {
