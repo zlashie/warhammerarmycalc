@@ -1,10 +1,21 @@
 @import "../../../../styles.css";
 
+:host {
+  display: block;      
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: auto;
+  margin: -8px -8px 0 -8px;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+}
+
 .header {
   background-color: var(--bg-main);
   border-bottom: 1px solid var(--border-color);
   box-shadow: var(--modern-shadow); 
-  padding: 0.75rem 0;
+  padding: 8px 0 10px 0;
   position: sticky;
   top: 0;
   z-index: 1000;
