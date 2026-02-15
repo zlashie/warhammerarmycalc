@@ -21,13 +21,44 @@
 </section>
 
 <div class="grid-container">
-  <app-card>
+    <app-card>
     <h3>Army Units</h3>
-    <p>Units, stats, or army rules go here.</p>
-  </app-card>
+    <hr class="card-divider">
+        <div class="unit-grid">
+            <div class="stat-col">
+                <span class="stat-label">Models</span>
+                <input type="text" class="stat-input" placeholder="1">
+            </div>
 
-  <app-card>
-    <h3>Target agnostic damage output</h3>
-    <p>Average damage output, given wounding is always on 4.</p>
-  </app-card>
+            <div class="stat-col">
+                <span class="stat-label">Attacks</span>
+                <input type="text" class="stat-input" placeholder="1">
+            </div>
+
+            <div class="stat-col">
+                <span class="stat-label">BS/WS</span>
+                <input type="text" class="stat-input" placeholder="4+">
+            </div>
+
+            <div class="stat-col">
+                <span class="stat-label">Strength</span>
+                <input type="text" class="stat-input" placeholder="4">
+            </div>
+
+            <div class="stat-col">
+                <span class="stat-label">AP</span>
+                <input type="text" class="stat-input" placeholder="0">
+            </div>
+
+            <div class="stat-col">
+                <span class="stat-label">Damage</span>
+                <input type="text" class="stat-input" placeholder="1">
+            </div>
+        </div>
+    </app-card>
+
+    <app-card>
+        <h3>Target agnostic damage output</h3>
+        <p>Average damage output, given wounding is always on 4.</p>
+    </app-card>
 </div>

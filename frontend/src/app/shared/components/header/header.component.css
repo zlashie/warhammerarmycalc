@@ -83,5 +83,5 @@
 
 .active::after {
   transform: scaleX(1) !important;
-  background-color: var(--text-main) !important;
+  background-color: var(--line-gold) !important;
 }

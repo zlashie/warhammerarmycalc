@@ -7,11 +7,12 @@
 
 .grid-container {
   display: grid !important;
-  grid-template-columns: 1fr 1fr !important; 
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 20px;
   width: 100%;
   margin-top: 2rem;
   align-items: start;
+  box-sizing: border-box;
 }
 
 app-card {
@@ -23,4 +24,57 @@ app-card {
   .grid-container {
     grid-template-columns: 1fr !important;
   }
+}
+
+.unit-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px; 
+  width: 100%;
+}
+
+.unit-grid div {
+  text-align: center;
+}
+
+.stat-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-input {
+  width: 100%;
+  
+  background-color: #f5f5f5;      
+  border: none;                   
+  border-bottom: 2px solid #9e9e9e; 
+  border-radius: 8px 8px 0 0;      
+  
+
+  padding: 12px 0;                 
+  text-align: center;
+  font-size: 1rem;
+  color: #333;
+  
+ 
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.stat-input:focus {
+  background-color: #eeeeee;
+  border-bottom-color: var(--line-gold); 
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.stat-input::placeholder {
+  color: #9e9e9e;
+  opacity: 0.5;   
+  font-weight: 300;
 }

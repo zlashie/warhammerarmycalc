@@ -28,7 +28,7 @@
   height: 100%;
   z-index: -1;
 
-  background-image: url('/warhammer-bg.jpeg'); 
+  background-image: url('/warhammer-bg.jpg'); 
   background-size: cover;
   background-position: center center;
   background-attachment: fixed;
