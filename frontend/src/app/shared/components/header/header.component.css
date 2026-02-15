@@ -10,7 +10,7 @@
 }
 
 .header {
-  background-color: var(--bg-main);
+  background-color: var(--bg-subtle);
   border-bottom: 1px solid var(--border-color);
   box-shadow: var(--modern-shadow); 
   padding: 8px 0 10px 0;
@@ -56,8 +56,26 @@
   padding: 0.5rem 0;
 }
 
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--text-muted);
+  
+  transform: scaleX(0);
+  transform-origin: bottom left;
+  transition: transform 0.3s ease-out;
+}
+
 .nav-link:hover {
   color: var(--text-main);
+}
+
+.nav-link:hover::after {
+  transform: scaleX(1);
 }
 
 .active {
@@ -65,11 +83,6 @@
 }
 
 .active::after {
-  content: '';
-  position: absolute;
-  bottom: 6px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: var(--text-main);
+  transform: scaleX(1) !important;
+  background-color: var(--text-main) !important;
 }

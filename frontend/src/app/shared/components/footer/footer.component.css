@@ -9,7 +9,7 @@
 .footer {
   border-top: 1px solid var(--border-color);
   padding: 2rem 0;
-  background-color: #ffffff;
+  background-color: var(--bg-subtle);
   margin-top: auto; 
 }
 
