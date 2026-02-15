@@ -4,7 +4,7 @@
   display: block;
   flex-direction: column;
   min-height: 100vh;
-  display: block;
+  overflow: visible;
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
@@ -13,6 +13,29 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: auto;
+  margin: -8px -8px 0 -8px;
+  position: relative;
+  z-index: 0;     
+}
+
+.app-wrapper::before {
+  content: "";
+  position: fixed; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+
+  background-image: url('/warhammer-bg.jpeg'); 
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+
+  filter: blur(6px) brightness(0.9); 
+  transform: scale(1.05);
 }
 
 .content-container {
@@ -22,4 +45,6 @@
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  position: relative;
+  z-index: 2;
 }

@@ -4,9 +4,10 @@
 
     --text-main: #111111;
     --text-muted: #666666;
+    --text-white: #ffffff;
 
     --border-color: #c9c9c9;
-    --modern-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --modern-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 
     --font-family: 'Calibri', 'Candara', 'Segoe UI', sans-serif;
 }
