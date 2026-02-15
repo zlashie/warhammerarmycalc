@@ -1,0 +1,15 @@
+@import "../../../../../styles.css";
+
+:host {
+  display: block;
+  width: 100%; 
+}
+
+.card-container {
+  background-color: var(--bg-subtle); 
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--modern-shadow);
+  padding: 2rem; 
+  box-sizing: border-box; 
+}

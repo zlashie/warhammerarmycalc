@@ -1,12 +1,14 @@
 import { Component, signal, inject, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CalculatorService } from '../../../core/services/calculator.service';
+import { CardComponent } from '../../shared/components/ui/card/card.component';
 
 @Component({
   selector: 'app-army-calc',
   standalone: true,
-  imports: [FormsModule],
-  templateUrl: './army-calc.component.html'
+  imports: [FormsModule, CardComponent],
+  templateUrl: './army-calc.component.html',
+  styleUrls: ['./army-calc.component.css']
 })
 
 export class ArmyCalcComponent {

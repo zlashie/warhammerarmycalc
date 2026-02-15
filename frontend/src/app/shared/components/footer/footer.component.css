@@ -1,10 +1,16 @@
 @import "../../../../styles.css";
 
+:host {
+  display: block;
+  width: auto;
+  margin: 0 -8px -8px -8px; 
+}
+
 .footer {
-  border-top: 1px solid #eaeaea;
+  border-top: 1px solid var(--border-color);
   padding: 2rem 0;
   background-color: #ffffff;
-  margin-top: auto; /* Ensures it pushes to bottom in flex layouts */
+  margin-top: auto; 
 }
 
 .container {
