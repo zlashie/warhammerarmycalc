@@ -38,4 +38,16 @@ export class ArmyCalcComponent {
   console.log('UI Sending:', num);
   this.numInput.set(num);
   }
+
+  unitToggles = {
+    lethal: false,
+    sustained: false,
+    devastating: false,
+    twinLinked: false,
+    rerollHits: false
+  };
+
+  toggleOrb(key: keyof typeof this.unitToggles) {
+    this.unitToggles[key] = !this.unitToggles[key];
+  }
 }

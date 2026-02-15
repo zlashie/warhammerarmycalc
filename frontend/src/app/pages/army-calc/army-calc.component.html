@@ -22,39 +22,87 @@
 
 <div class="grid-container">
     <app-card>
-    <h3>Army Units</h3>
-    <hr class="card-divider">
-        <div class="unit-grid">
-            <div class="stat-col">
-                <span class="stat-label">Models</span>
-                <input type="text" class="stat-input" placeholder="1">
+        <h3>Army Units</h3>
+        <hr class="card-divider">
+            <div class="unit-grid">
+                <div class="stat-col">
+                    <span class="stat-label">Models</span>
+                    <input type="text" class="stat-input" placeholder="1">
+                </div>
+
+                <div class="stat-col">
+                    <span class="stat-label">Attacks</span>
+                    <input type="text" class="stat-input" placeholder="1">
+                </div>
+
+                <div class="stat-col">
+                    <span class="stat-label">BS/WS</span>
+                    <input type="text" class="stat-input" placeholder="4+">
+                </div>
+
+                <div class="stat-col">
+                    <span class="stat-label">Strength</span>
+                    <input type="text" class="stat-input" placeholder="4">
+                </div>
+
+                <div class="stat-col">
+                    <span class="stat-label">AP</span>
+                    <input type="text" class="stat-input" placeholder="0">
+                </div>
+
+                <div class="stat-col">
+                    <span class="stat-label">Damage</span>
+                    <input type="text" class="stat-input" placeholder="1">
+                </div>
             </div>
 
-            <div class="stat-col">
-                <span class="stat-label">Attacks</span>
-                <input type="text" class="stat-input" placeholder="1">
+        <hr class="card-divider"> 
+            <div class="toggle-grid">
+                <div class="toggle-col">
+                    <button type="button" class="orb" 
+                            [class.active]="unitToggles.lethal" 
+                            (click)="toggleOrb('lethal')">L</button>
+                    <span class="stat-label">Lethal</span>
+                </div>
+
+                <div class="toggle-col">
+                    <button type="button" class="orb" 
+                            [class.active]="unitToggles.sustained" 
+                            (click)="toggleOrb('sustained')">S</button>
+                    <span class="stat-label">Sustained</span>
+                </div>
+
+                <div class="toggle-col">
+                    <button type="button" class="orb" 
+                            [class.active]="unitToggles.devastating" 
+                            (click)="toggleOrb('devastating')">D</button>
+                    <span class="stat-label">Dev Wounds</span>
+                </div>
+
+                <div class="toggle-col">
+                    <button type="button" class="orb" 
+                            [class.active]="unitToggles.twinLinked" 
+                            (click)="toggleOrb('twinLinked')">T</button>
+                    <span class="stat-label">TwinLinked</span>
+                </div>
+
+                <div class="toggle-col">
+                    <button type="button" class="orb" 
+                            [class.active]="unitToggles.rerollHits" 
+                            (click)="toggleOrb('rerollHits')">A</button>
+                    <span class="stat-label">Reroll Hits</span>
+                </div>
+                
+                <div></div>
             </div>
 
-            <div class="stat-col">
-                <span class="stat-label">BS/WS</span>
-                <input type="text" class="stat-input" placeholder="4+">
+        <hr class="card-divider">   
+            <div class="card-footer">
+                <button type="button" class="add-unit-btn">
+                    <span class="plus-sign">+</span> Add Unit
+                </button>
             </div>
 
-            <div class="stat-col">
-                <span class="stat-label">Strength</span>
-                <input type="text" class="stat-input" placeholder="4">
-            </div>
-
-            <div class="stat-col">
-                <span class="stat-label">AP</span>
-                <input type="text" class="stat-input" placeholder="0">
-            </div>
-
-            <div class="stat-col">
-                <span class="stat-label">Damage</span>
-                <input type="text" class="stat-input" placeholder="1">
-            </div>
-        </div>
     </app-card>
 
     <app-card>
