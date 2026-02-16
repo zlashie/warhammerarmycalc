@@ -16,16 +16,16 @@
 }
 
 .card-divider {
-    border: none;
-    border-top: 1px solid #eeeeee;
-    margin: 16px 0 20px 0;
+    border: 0;
+    border-top: 1px solid #e0e0e0; 
+    margin: 20px 0;
+    width: 100%;
 }
 
 .ledger-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding-bottom: 8px;
 }
 
 .ledger-row {
@@ -115,7 +115,6 @@
 .empty-ledger-box {
     background-color: #f9f9f9;
     border-radius: 8px;
-    padding: 30px;
     text-align: center;
     color: #ccc;
     font-size: 0.8rem;
