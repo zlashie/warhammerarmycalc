@@ -1,6 +1,20 @@
-<div class="toggle-container" (click)="onToggle()">
-  <div class="orb" [class.active]="active">
-    {{ abbreviation }}
+<div class="toggle-container">
+  <div class="orb" [class.active]="active" (click)="onToggle()">
+    {{ (active && active !== true) ? active : abbreviation }}
   </div>
   <span class="orb-label" [class.active]="active">{{ label }}</span>
+
+  @if (showMenu) {
+    <div class="selection-popup">
+      <div class="options-wrapper">
+        @for (opt of options; track opt) {
+          <button type="button" class="sub-orb" (click)="selectOption(opt)">
+            {{ opt }}
+          </button>
+        }
+        <button type="button" class="sub-orb clear-btn" (click)="clear()">×</button>
+      </div>
+      <div class="popup-arrow"></div>
+    </div>
+  }
 </div>

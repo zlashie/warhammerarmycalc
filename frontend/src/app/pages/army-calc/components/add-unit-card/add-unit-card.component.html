@@ -19,12 +19,44 @@
     <hr class="card-divider">
 
     <div class="toggle-grid">
-        <app-toggle-orb abbreviation="L" label="Lethal" [(active)]="currentUnit.toggles.lethal"></app-toggle-orb>
-        <app-toggle-orb abbreviation="S" label="Sustained" [(active)]="currentUnit.toggles.sustained"></app-toggle-orb>
-        <app-toggle-orb abbreviation="D" label="Crit X+" [(active)]="currentUnit.toggles.crit"></app-toggle-orb>
-        <app-toggle-orb abbreviation="A" label="Reroll Hits" [(active)]="currentUnit.toggles.rerollHits"></app-toggle-orb>
-        <app-toggle-orb abbreviation="T" label="Reroll Wounds" [(active)]="currentUnit.toggles.rerollWounds"></app-toggle-orb>
-        <app-toggle-orb abbreviation="X" label="Anti-X" [(active)]="currentUnit.toggles.antiX"></app-toggle-orb>
-        <app-toggle-orb abbreviation="D" label="Dev Wounds" [(active)]="currentUnit.toggles.devastating"></app-toggle-orb>
+      <app-toggle-orb abbreviation="L" label="Lethal" [(active)]="currentUnit.toggles.lethal"></app-toggle-orb>
+
+      <app-toggle-orb 
+        abbreviation="S" 
+        label="Sustained" 
+        [options]="['1', '2', '3', 'D3']" 
+        [(active)]="currentUnit.toggles.sustained">
+      </app-toggle-orb>
+
+      <app-toggle-orb 
+        abbreviation="C" 
+        label="Crit X+" 
+        [options]="['4+', '5+', '6+']" 
+        [(active)]="currentUnit.toggles.crit">
+      </app-toggle-orb>
+
+      <app-toggle-orb 
+        abbreviation="RH" 
+        label="Reroll Hits" 
+        [options]="['1s', 'Fail', 'All']" 
+        [(active)]="currentUnit.toggles.rerollHits">
+      </app-toggle-orb>
+
+      <app-toggle-orb 
+        abbreviation="RW" 
+        label="Reroll Wounds" 
+        [options]="['1s', 'Fail', 'All']" 
+        [(active)]="currentUnit.toggles.rerollWounds">
+      </app-toggle-orb>
+
+      <app-toggle-orb 
+        abbreviation="X" 
+        label="Anti-X" 
+        [options]="['2+', '3+', '4+', '5+']" 
+        [(active)]="currentUnit.toggles.antiX">
+      </app-toggle-orb>
+
+      <app-toggle-orb abbreviation="D" label="Dev Wounds" [(active)]="currentUnit.toggles.devastating"></app-toggle-orb>
     </div>
-  </div> </app-card>
+  </div>
+</app-card>

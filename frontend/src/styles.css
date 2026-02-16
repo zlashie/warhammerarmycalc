@@ -1,6 +1,7 @@
 :root{
     --bg-main: #ffffff;
-    --bg-subtle: #fafafa; 
+    --bg-subtle: #fafafa;
+    --bg-hover: #ededed; 
 
     --text-main: #111111;
     --text-muted: #666666;

@@ -33,6 +33,10 @@
     transition: all 0.2s ease;
 }
 
+.stat-field:hover {
+    background-color: var(--bg-hover);
+}
+
 .stat-field::placeholder {
     color: #c9c9c9;
 }

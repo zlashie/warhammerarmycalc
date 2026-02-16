@@ -12,51 +12,30 @@ import { ToggleOrbComponent } from '../../../../shared/components/ui/toggle-orb/
   templateUrl: './add-unit-card.component.html',
   styleUrls: ['./add-unit-card.component.css']
 })
-
 export class AddUnitCardComponent {
   @Output() unitAdded = new EventEmitter<any>();
 
-  currentUnit = {
-    stats: {
-      models: '',
-      attacks: '',
-      bsWs: '',
-      strength: '',
-      ap: '',
-      damage: ''
-    },
-    toggles: {
-      lethal: false,
-      sustained: false,
-      devastating: false,
-      rerollWounds: false,
-      rerollHits: false,
-      antiX: false,
-      crit: false
-    }
-  };
+  private getInitialUnitState() {
+    return {
+      stats: {
+        models: '', attacks: '', bsWs: '', strength: '', ap: '', damage: ''
+      },
+      toggles: {
+        lethal: false,        
+        sustained: false,     
+        crit: false,          
+        rerollHits: false,    
+        rerollWounds: false, 
+        antiX: false,         
+        devastating: false    
+      }
+    };
+  }
+
+  currentUnit = this.getInitialUnitState();
 
   submitUnit() {
     this.unitAdded.emit({ ...this.currentUnit, id: Date.now() });
-    
-    this.currentUnit = {
-      stats: {
-        models: '',
-        attacks: '',
-        bsWs: '',
-        strength: '',
-        ap: '',
-        damage: ''
-      },
-      toggles: {
-        lethal: false,
-        sustained: false,
-        devastating: false,
-        rerollWounds: false,
-        rerollHits: false,
-        antiX: false,
-        crit: false
-      }
-    };
+    this.currentUnit = this.getInitialUnitState();
   }
 }
