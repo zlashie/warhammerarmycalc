@@ -46,3 +46,19 @@
     gap: 5px; 
     margin-top: 10px;
 }
+
+.identity-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 12px;
+    align-items: flex-end;
+}
+
+.name-field {
+    flex: 3; 
+}
+
+.points-field {
+    flex: 1;
+    min-width: 80px;
+}

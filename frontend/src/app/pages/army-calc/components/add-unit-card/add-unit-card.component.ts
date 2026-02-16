@@ -17,7 +17,9 @@ export class AddUnitCardComponent {
 
   private getInitialUnitState() {
     return {
-      stats: {
+        name: '',
+        points: '',
+        stats: {
         models: '', attacks: '', bsWs: '', strength: '', ap: '', damage: ''
       },
       toggles: {

@@ -6,6 +6,17 @@
     </div>
 
     <hr class="card-divider">
+    
+    <div class="identity-row">
+      <div class="name-field">
+        <app-stat-input label="Unit Name" placeholder="Intercessors" [(value)]="currentUnit.name"></app-stat-input>
+      </div>
+      <div class="points-field">
+        <app-stat-input label="Point Cost" placeholder="100" [(value)]="currentUnit.points"></app-stat-input>
+      </div>
+    </div>
+
+    <hr class="card-divider">
 
     <div class="stat-grid">
       <app-stat-input label="Models" placeholder="1" [(value)]="currentUnit.stats.models"></app-stat-input>
