@@ -1,9 +1,6 @@
 <div class="grid-container">
-    <div class="units-column">
-
+<div class="units-column">
         <app-add-unit-card (unitAdded)="onUnitAdded($event)"></app-add-unit-card>
-
-        <hr class="debug-divider" style="border: 1px dashed #9e9e9e; margin: 40px 0;">
 
         @for (unit of armyUnits(); track unit.id) {
             <app-card>
@@ -11,47 +8,16 @@
                     <div class="card-header-actions">
                         <h3>Unit #{{ armyUnits().length - $index }}</h3>
                         
-                        <div class="unit-controls">
-                            @if ($first) {
-                                <button type="button" class="action-orb" (click)="addUnit()">
-                                    <span class="plus-sign">+</span>
-                                </button>
-                            } @else {
-                                <button type="button" class="action-orb remove" (click)="removeUnit(unit.id)">
-                                    <span class="minus-sign">&times;</span>
-                                </button>
-                            }
-                        </div>
+                        <button type="button" class="action-orb-button remove" (click)="removeUnit(unit.id)" 
+                                style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #ff4444; color: #ff4444; background: white; cursor: pointer;">
+                            &times;
+                        </button>
                     </div>
                     
                     <hr class="card-divider">
                     
-                    <div class="unit-grid">
-                        @for (field of statFields; track field.key) {
-                            <div class="stat-col">
-                                <span class="stat-label">{{ field.label }}</span>
-                                <input type="text" class="stat-input" 
-                                       [placeholder]="field.placeholder"
-                                       [(ngModel)]="unit.stats[field.key]">
-                            </div>
-                        }
-                    </div>
-
-                    <hr class="card-divider"> 
-                    
-                    <div class="toggle-grid">
-                        @for (t of toggleFields; track t.key) {
-                            <div class="toggle-col">
-                                <button type="button" class="orb" 
-                                        [class.active]="$any(unit.toggles)[t.key]" 
-                                        (click)="toggleOrb(unit.id, t.key)">
-                                    {{ t.icon }}
-                                </button>
-                                <span class="stat-label">{{ t.label }}</span>
-                            </div>
-                        }
-                    </div>
-                    </div>        
+                    <pre style="font-size: 0.8rem; color: #666; background: #f9f9f9; padding: 10px; border-radius: 4px;">{{ unit | json }}</pre>
+                </div>
             </app-card>
         }
     </div>

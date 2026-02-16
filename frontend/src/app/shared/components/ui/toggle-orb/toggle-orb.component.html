@@ -1,0 +1,6 @@
+<div class="toggle-container" (click)="onToggle()">
+  <div class="orb" [class.active]="active">
+    {{ abbreviation }}
+  </div>
+  <span class="orb-label" [class.active]="active">{{ label }}</span>
+</div>

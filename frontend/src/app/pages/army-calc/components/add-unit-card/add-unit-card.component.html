@@ -15,5 +15,16 @@
       <app-stat-input label="AP" placeholder="0" [(value)]="currentUnit.stats.ap"></app-stat-input>
       <app-stat-input label="Damage" placeholder="1" [(value)]="currentUnit.stats.damage"></app-stat-input>
     </div>
-  </div>
-</app-card>
+
+    <hr class="card-divider">
+
+    <div class="toggle-grid">
+        <app-toggle-orb abbreviation="L" label="Lethal" [(active)]="currentUnit.toggles.lethal"></app-toggle-orb>
+        <app-toggle-orb abbreviation="S" label="Sustained" [(active)]="currentUnit.toggles.sustained"></app-toggle-orb>
+        <app-toggle-orb abbreviation="D" label="Crit X+" [(active)]="currentUnit.toggles.crit"></app-toggle-orb>
+        <app-toggle-orb abbreviation="A" label="Reroll Hits" [(active)]="currentUnit.toggles.rerollHits"></app-toggle-orb>
+        <app-toggle-orb abbreviation="T" label="Reroll Wounds" [(active)]="currentUnit.toggles.rerollWounds"></app-toggle-orb>
+        <app-toggle-orb abbreviation="X" label="Anti-X" [(active)]="currentUnit.toggles.antiX"></app-toggle-orb>
+        <app-toggle-orb abbreviation="D" label="Dev Wounds" [(active)]="currentUnit.toggles.devastating"></app-toggle-orb>
+    </div>
+  </div> </app-card>
