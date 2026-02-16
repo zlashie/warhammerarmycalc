@@ -54,7 +54,13 @@ export class ArmyCalcComponent {
   }
 
   onEditUnit(unit: Unit) {
-    this.editingUnit.set(unit);
+    const currentEdit = this.editingUnit();
+    
+    if (currentEdit && currentEdit.id === unit.id) {
+      this.editingUnit.set(null);
+    } else {
+      this.editingUnit.set(unit);
+    }
   }
 
   onSaveUnit(unitData: Unit) {
