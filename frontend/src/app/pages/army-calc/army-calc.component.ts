@@ -2,6 +2,7 @@ import { Component, signal, inject, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CardComponent } from '../../shared/components/ui/card/card.component';
 import { CalculatorService } from '../../../core/services/calculator.service';
+import { AddUnitCardComponent } from './components/add-unit-card/add-unit-card.component';
 
 interface Unit {
   id: number;
@@ -18,7 +19,7 @@ interface Unit {
 @Component({
   selector: 'app-army-calc',
   standalone: true,
-  imports: [FormsModule, CardComponent],
+  imports: [FormsModule, CardComponent, AddUnitCardComponent],
   templateUrl: './army-calc.component.html',
   styleUrls: ['./army-calc.component.css']
 })
@@ -89,5 +90,10 @@ createDefaultUnit(): Unit {
       }
       return u;
     }));
+  }
+
+  onUnitAdded(newUnit: any) {
+    this.armyUnits.update(units => [newUnit, ...units]);
+    console.log('Unit received from child component:', newUnit);
   }
 }

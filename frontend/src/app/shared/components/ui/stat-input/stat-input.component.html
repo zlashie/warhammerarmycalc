@@ -1,0 +1,11 @@
+<div class="stat-container">
+  <span class="stat-label">{{ label }}</span>
+  <input 
+    type="text" 
+    class="stat-field"
+    [class.has-value]="value && value.length > 0"
+    [placeholder]="placeholder"
+    [ngModel]="value"
+    (ngModelChange)="onInput($event)"
+  >
+</div>

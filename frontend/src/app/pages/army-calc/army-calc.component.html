@@ -1,5 +1,10 @@
 <div class="grid-container">
     <div class="units-column">
+
+        <app-add-unit-card (unitAdded)="onUnitAdded($event)"></app-add-unit-card>
+
+        <hr class="debug-divider" style="border: 1px dashed #9e9e9e; margin: 40px 0;">
+
         @for (unit of armyUnits(); track unit.id) {
             <app-card>
                 <div class="card-content-wrapper">

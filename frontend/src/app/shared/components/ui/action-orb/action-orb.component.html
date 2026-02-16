@@ -1,0 +1,9 @@
+<button 
+  type="button" 
+  class="action-orb-button" 
+  [class.remove-mode]="mode === 'remove'"
+  (click)="handleAction($event)">
+  <span class="icon-wrapper">
+    {{ mode === 'add' ? '+' : '×' }}
+  </span>
+</button>
