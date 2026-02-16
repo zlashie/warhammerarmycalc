@@ -1,134 +1,77 @@
-<section class="calculator-card">
-  <h2>Warhammer Army Calculator</h2>
-  
-  <div class="input-group">
-    <label>Input Number:</label>
-    <input 
-      type="number" 
-      [value]="numInput()" 
-      (input)="onInput($any($event.target).value)"
-    >
-  </div>
-
-  <div class="results">
-    @if (isLoading()) {
-      <p>Contacting Backend...</p>
-    } @else if (result() !== undefined) {
-      <h3>Result: <span class="highlight">{{ result() }}</span></h3>
-    }
-  </div>
-
-</section>
-
 <div class="grid-container">
-    <app-card>
-        <div class="card-content-wrapper">
-            <h3>Army Units</h3>
-            <hr class="card-divider">
-                <div class="unit-grid">
-                    <div class="stat-col">
-                        <span class="stat-label">Models</span>
-                        <input type="text" class="stat-input" placeholder="1">
-                    </div>
-
-                    <div class="stat-col">
-                        <span class="stat-label">Attacks</span>
-                        <input type="text" class="stat-input" placeholder="1">
-                    </div>
-
-                    <div class="stat-col">
-                        <span class="stat-label">BS/WS</span>
-                        <input type="text" class="stat-input" placeholder="4+">
-                    </div>
-
-                    <div class="stat-col">
-                        <span class="stat-label">Strength</span>
-                        <input type="text" class="stat-input" placeholder="4">
-                    </div>
-
-                    <div class="stat-col">
-                        <span class="stat-label">AP</span>
-                        <input type="text" class="stat-input" placeholder="0">
-                    </div>
-
-                    <div class="stat-col">
-                        <span class="stat-label">Damage</span>
-                        <input type="text" class="stat-input" placeholder="1">
-                    </div>
-                </div>
-
-            <hr class="card-divider"> 
-                <div class="toggle-grid">
-                    <div class="toggle-col">
-                        <button type="button" class="orb" 
-                                [class.active]="unitToggles.lethal" 
-                                (click)="toggleOrb('lethal')">L</button>
-                        <span class="stat-label">Lethal</span>
-                    </div>
-
-                    <div class="toggle-col">
-                        <button type="button" class="orb" 
-                                [class.active]="unitToggles.sustained" 
-                                (click)="toggleOrb('sustained')">S</button>
-                        <span class="stat-label">Sustained</span>
-                    </div>
-
-                    <div class="toggle-col">
-                        <button type="button" class="orb" 
-                                [class.active]="unitToggles.devastating" 
-                                (click)="toggleOrb('devastating')">D</button>
-                        <span class="stat-label">Dev Wounds</span>
-                    </div>
-
-                    <div class="toggle-col">
-                        <button type="button" class="orb" 
-                                [class.active]="unitToggles.twinLinked" 
-                                (click)="toggleOrb('twinLinked')">T</button>
-                        <span class="stat-label">TwinLinked</span>
-                    </div>
-
-                    <div class="toggle-col">
-                        <button type="button" class="orb" 
-                                [class.active]="unitToggles.rerollHits" 
-                                (click)="toggleOrb('rerollHits')">A</button>
-                        <span class="stat-label">Reroll Hits</span>
+    <div class="units-column">
+        @for (unit of armyUnits(); track unit.id) {
+            <app-card>
+                <div class="card-content-wrapper">
+                    <div class="card-header-actions">
+                        <h3>Unit #{{ armyUnits().length - $index }}</h3>
+                        
+                        <div class="unit-controls">
+                            @if ($first) {
+                                <button type="button" class="action-orb" (click)="addUnit()">
+                                    <span class="plus-sign">+</span>
+                                </button>
+                            } @else {
+                                <button type="button" class="action-orb remove" (click)="removeUnit(unit.id)">
+                                    <span class="minus-sign">&times;</span>
+                                </button>
+                            }
+                        </div>
                     </div>
                     
-                    <div></div>
-                </div>
+                    <hr class="card-divider">
+                    
+                    <div class="unit-grid">
+                        @for (field of statFields; track field.key) {
+                            <div class="stat-col">
+                                <span class="stat-label">{{ field.label }}</span>
+                                <input type="text" class="stat-input" 
+                                       [placeholder]="field.placeholder"
+                                       [(ngModel)]="unit.stats[field.key]">
+                            </div>
+                        }
+                    </div>
 
-            <hr class="card-divider">   
-                <div class="card-footer">
-                    <button type="button" class="add-unit-btn">
-                        <span class="plus-sign">+</span> Add Unit
-                    </button>
-                </div>
-        </div>        
-    </app-card>
+                    <hr class="card-divider"> 
+                    
+                    <div class="toggle-grid">
+                        @for (t of toggleFields; track t.key) {
+                            <div class="toggle-col">
+                                <button type="button" class="orb" 
+                                        [class.active]="$any(unit.toggles)[t.key]" 
+                                        (click)="toggleOrb(unit.id, t.key)">
+                                    {{ t.icon }}
+                                </button>
+                                <span class="stat-label">{{ t.label }}</span>
+                            </div>
+                        }
+                    </div>
+                    </div>        
+            </app-card>
+        }
+    </div>
 
     <app-card>
         <div class="card-content-wrapper">
-            <h3>Damage Distribution</h3>
+            <h3>Total Damage Distribution</h3>
             <hr class="card-divider">
             
             <div class="chart-area">
-            <div class="y-axis-label">Probability</div>
+                <div class="y-axis-label">Probability</div>
 
-            <div class="graph-wrapper">
-                <svg viewBox="0 0 400 200" class="distribution-graph" preserveAspectRatio="none">
-                <path d="M 20 180 C 100 180 150 10 200 10 C 250 10 300 180 380 180 L 380 180 L 20 180 Z" class="curve-area" />
-                
-                <line x1="200" y1="10" x2="200" y2="180" class="mean-line" />
-                
-                <path d="M 20 180 C 100 180 150 10 200 10 C 250 10 300 180 380 180" class="curve-line" />
-                </svg>
+                <div class="graph-wrapper">
+                    <svg viewBox="0 0 400 200" class="distribution-graph" preserveAspectRatio="none">
+                        <path d="M 20 180 C 100 180 150 10 200 10 C 250 10 300 180 380 180 L 380 180 L 20 180 Z" class="curve-area" />
+                        <line x1="200" y1="10" x2="200" y2="180" class="mean-line" />
+                        <path d="M 20 180 C 100 180 150 10 200 10 C 250 10 300 180 380 180" class="curve-line" />
+                    </svg>
 
-                <div class="x-axis">
-                    <span>0 Dmg</span>
-                    <span>Expected</span>
-                    <span>Max Dmg</span>
+                    <div class="x-axis">
+                        <span>0 Dmg</span>
+                        <span>Expected</span>
+                        <span>Max Dmg</span>
+                    </div>
                 </div>
-            </div>
             </div>
 
             <hr class="card-divider">

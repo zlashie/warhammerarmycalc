@@ -1,7 +1,19 @@
 import { Component, signal, inject, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CalculatorService } from '../../../core/services/calculator.service';
 import { CardComponent } from '../../shared/components/ui/card/card.component';
+import { CalculatorService } from '../../../core/services/calculator.service';
+
+interface Unit {
+  id: number;
+  stats: { [key: string]: any };
+  toggles: {
+    lethal: boolean;
+    sustained: boolean;
+    devastating: boolean;
+    twinLinked: boolean;
+    rerollHits: boolean;
+  };
+}
 
 @Component({
   selector: 'app-army-calc',
@@ -10,44 +22,72 @@ import { CardComponent } from '../../shared/components/ui/card/card.component';
   templateUrl: './army-calc.component.html',
   styleUrls: ['./army-calc.component.css']
 })
-
 export class ArmyCalcComponent {
   private calcService = inject(CalculatorService);
-  
-  numInput = signal(0);
-  result = signal<number | undefined>(undefined);
+
+  armyUnits = signal<Unit[]>([this.createDefaultUnit()]);
   isLoading = signal(false);
+
+  statFields = [
+    { label: 'Models', key: 'models', placeholder: '1' },
+    { label: 'Attacks', key: 'attacks', placeholder: '1' },
+    { label: 'BS/WS', key: 'bsWs', placeholder: '4+' },
+    { label: 'Strength', key: 'strength', placeholder: '4' },
+    { label: 'AP', key: 'ap', placeholder: '0' },
+    { label: 'Damage', key: 'damage', placeholder: '1' }
+  ];
+
+  toggleFields = [
+    { label: 'Lethal', key: 'lethal', icon: 'L' },
+    { label: 'Sustained', key: 'sustained', icon: 'S' },
+    { label: 'Dev Wounds', key: 'devastating', icon: 'D' },
+    { label: 'TwinLinked', key: 'twinLinked', icon: 'T' },
+    { label: 'Reroll Hits', key: 'rerollHits', icon: 'A' }
+  ];
 
   constructor() {
     effect(() => {
-      const val = this.numInput();
-      this.isLoading.set(true);
-      
-      this.calcService.getIncrement(val).subscribe({
-        next: (val) => {
-          this.result.set(val);
-          this.isLoading.set(false);
-        },
-        error: () => this.isLoading.set(false)
-      });
+      const units = this.armyUnits();
+      console.log('Pipeline Triggered. Sending Army to Backend:', units);
     });
   }
 
-  onInput(val: string) {
-  const num = Number(val);
-  console.log('UI Sending:', num);
-  this.numInput.set(num);
+createDefaultUnit(): Unit {
+  return {
+    id: Date.now(),
+    stats: { 
+      models: null, 
+      attacks: null, 
+      bsWs: null, 
+      strength: null, 
+      ap: null, 
+      damage: null 
+    },
+    toggles: { 
+      lethal: false, 
+      sustained: false, 
+      devastating: false, 
+      twinLinked: false, 
+      rerollHits: false 
+    }
+  };
+}
+
+  addUnit() {
+    this.armyUnits.update(units => [this.createDefaultUnit(), ...units]);
   }
 
-  unitToggles = {
-    lethal: false,
-    sustained: false,
-    devastating: false,
-    twinLinked: false,
-    rerollHits: false
-  };
+  removeUnit(id: number) {
+    this.armyUnits.update(units => units.filter(u => u.id !== id));
+  }
 
-  toggleOrb(key: keyof typeof this.unitToggles) {
-    this.unitToggles[key] = !this.unitToggles[key];
+  toggleOrb(unitId: number, key: string) {
+    this.armyUnits.update(units => units.map(u => {
+      if (u.id === unitId) {
+        const toggles = u.toggles as any;
+        return { ...u, toggles: { ...toggles, [key]: !toggles[key] } };
+      }
+      return u;
+    }));
   }
 }
