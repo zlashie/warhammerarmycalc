@@ -2,24 +2,11 @@
 <div class="units-column">
         <app-add-unit-card (unitAdded)="onUnitAdded($event)"></app-add-unit-card>
 
-        @for (unit of armyUnits(); track unit.id) {
-            <app-card>
-                <div class="card-content-wrapper">
-                    <div class="card-header-actions">
-                        <h3>Unit #{{ armyUnits().length - $index }}</h3>
-                        
-                        <button type="button" class="action-orb-button remove" (click)="removeUnit(unit.id)" 
-                                style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #ff4444; color: #ff4444; background: white; cursor: pointer;">
-                            &times;
-                        </button>
-                    </div>
-                    
-                    <hr class="card-divider">
-                    
-                    <pre style="font-size: 0.8rem; color: #666; background: #f9f9f9; padding: 10px; border-radius: 4px;">{{ unit | json }}</pre>
-                </div>
-            </app-card>
-        }
+        <app-ledger-card 
+            [units]="armyUnits()" 
+            (deleteUnit)="removeUnit($event)"
+            (editUnit)="onEditUnit($event)">
+        </app-ledger-card>
     </div>
 
     <app-card>

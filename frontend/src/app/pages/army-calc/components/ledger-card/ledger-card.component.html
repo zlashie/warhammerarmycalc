@@ -1,0 +1,37 @@
+<app-card>
+  <div class="ledger-container">
+    <div class="ledger-header">
+      <h3 class="ledger-title">Army Ledger</h3>
+    </div>
+
+    <hr class="card-divider">
+
+    <div class="ledger-list">
+      @for (unit of units(); track unit.id) {
+        <div class="ledger-row" (click)="onEdit(unit)">
+          
+          <div class="unit-identity">
+            <span class="unit-points">{{ unit.points || 0 }}p</span>
+            <span class="unit-name">{{ unit.name || 'Unnamed Unit' }}</span>
+          </div>
+
+          <div class="orb-signature">
+            <div class="mini-indicator" [class.active]="unit.toggles.lethal"></div>
+            <div class="mini-indicator" [class.active]="unit.toggles.sustained"></div>
+            <div class="mini-indicator" [class.active]="unit.toggles.crit"></div>
+            <div class="mini-indicator" [class.active]="unit.toggles.rerollHits"></div>
+            <div class="mini-indicator" [class.active]="unit.toggles.rerollWounds"></div>
+            <div class="mini-indicator" [class.active]="unit.toggles.antiX"></div>
+            <div class="mini-indicator" [class.active]="unit.toggles.devastating"></div>
+          </div>
+
+          <button class="row-delete" (click)="onDelete(unit.id, $event)"></button>
+        </div>
+      } @empty {
+        <div class="empty-ledger-box">
+          Add units to the ledger above
+        </div>
+      }
+    </div>
+  </div>
+</app-card>
