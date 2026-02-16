@@ -39,6 +39,7 @@ export class ArmyCalcComponent {
   private calcService = inject(CalculatorService);
 
   armyUnits = signal<Unit[]>([]);
+  editingUnit = signal<Unit | null>(null);
   isLoading = signal(false);
 
   constructor() {
@@ -53,7 +54,18 @@ export class ArmyCalcComponent {
   }
 
   onEditUnit(unit: Unit) {
-    console.log('Opening edit popup for:', unit.name);
+    this.editingUnit.set(unit);
+  }
+
+  onSaveUnit(unitData: Unit) {
+    if (this.editingUnit()) {
+      this.armyUnits.update(units => 
+        units.map(u => u.id === unitData.id ? unitData : u)
+      );
+      this.editingUnit.set(null); 
+    } else {
+      this.armyUnits.update(units => [unitData, ...units]);
+    }
   }
 
   removeUnit(id: number) {

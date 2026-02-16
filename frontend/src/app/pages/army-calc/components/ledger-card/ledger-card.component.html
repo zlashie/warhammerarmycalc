@@ -8,7 +8,9 @@
 
     <div class="ledger-list">
       @for (unit of units(); track unit.id) {
-        <div class="ledger-row" (click)="onEdit(unit)">
+        <div class="ledger-row" 
+        [class.is-editing]="activeUnit() && unit.id === activeUnit().id"
+        (click)="onEdit(unit)">
           
           <div class="unit-identity">
             <span class="unit-points">{{ unit.points || 0 }}p</span>

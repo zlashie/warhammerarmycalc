@@ -1,11 +1,15 @@
 <div class="grid-container">
 <div class="units-column">
-        <app-add-unit-card (unitAdded)="onUnitAdded($event)"></app-add-unit-card>
+        <app-add-unit-card 
+            [unitToEdit]="editingUnit()" 
+            (unitAdded)="onSaveUnit($event)">
+        </app-add-unit-card>
 
         <app-ledger-card 
             [units]="armyUnits()" 
-            (deleteUnit)="removeUnit($event)"
-            (editUnit)="onEditUnit($event)">
+            [activeUnit]="editingUnit()" 
+            (editUnit)="onEditUnit($event)"
+            (deleteUnit)="removeUnit($event)">
         </app-ledger-card>
     </div>
 

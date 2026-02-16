@@ -1,8 +1,13 @@
 <app-card>
   <div class="card-content-wrapper">
     <div class="header-row">
-      <h3 class="card-title">Configure New Unit</h3>
-      <app-action-orb mode="add" (action)="submitUnit()"></app-action-orb>
+      <h3 class="card-title">
+        {{ unitToEdit() ? 'Edit Unit' : 'Configure New Unit' }}
+      </h3>
+      <app-action-orb 
+        mode="add" 
+        (action)="submitUnit()">
+      </app-action-orb>
     </div>
 
     <hr class="card-divider">

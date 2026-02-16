@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./action-orb.component.css']
 })
 export class ActionOrbComponent {
-  @Input() mode: 'add' | 'remove' = 'add';
+  @Input() mode: 'add' | 'remove' | 'edit' = 'add';
   @Output() action = new EventEmitter<void>();
 
   handleAction(event: Event) {

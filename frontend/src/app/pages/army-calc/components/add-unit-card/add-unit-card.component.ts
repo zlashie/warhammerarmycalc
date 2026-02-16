@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, input, effect } from '@angular/core'; // Added input, effect
 import { CommonModule } from '@angular/common';
 import { ActionOrbComponent } from '../../../../shared/components/ui/action-orb/action-orb.component';
 import { CardComponent } from '../../../../shared/components/ui/card/card.component';
@@ -13,13 +13,27 @@ import { ToggleOrbComponent } from '../../../../shared/components/ui/toggle-orb/
   styleUrls: ['./add-unit-card.component.css']
 })
 export class AddUnitCardComponent {
+  unitToEdit = input<any | null>(null); 
+
   @Output() unitAdded = new EventEmitter<any>();
+
+  constructor() {
+    effect(() => {
+      const unit = this.unitToEdit();
+      if (unit) {
+        this.currentUnit = JSON.parse(JSON.stringify(unit));
+      } else {
+        this.currentUnit = this.getInitialUnitState();
+      }
+    });
+  }
 
   private getInitialUnitState() {
     return {
-        name: '',
-        points: '',
-        stats: {
+      id: null as number | null,
+      name: '',
+      points: '',
+      stats: {
         models: '', attacks: '', bsWs: '', strength: '', ap: '', damage: ''
       },
       toggles: {
@@ -37,7 +51,12 @@ export class AddUnitCardComponent {
   currentUnit = this.getInitialUnitState();
 
   submitUnit() {
-    this.unitAdded.emit({ ...this.currentUnit, id: Date.now() });
+    const unitData = {
+      ...this.currentUnit,
+      id: this.currentUnit.id || Date.now() 
+    };
+
+    this.unitAdded.emit(unitData);
     this.currentUnit = this.getInitialUnitState();
   }
 }

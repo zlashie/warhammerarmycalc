@@ -11,6 +11,7 @@ import { CardComponent } from '../../../../shared/components/ui/card/card.compon
 })
 export class LedgerCardComponent {
   units = input.required<any[]>();
+  activeUnit = input<any | null>(null);
   
   deleteUnit = output<number>();
   editUnit = output<any>(); 

@@ -45,6 +45,12 @@
     border-left: 3px solid var(--line-gold);
 }
 
+.ledger-row.is-editing {
+    transform: translateX(-20px);   
+    border-left: 3px solid var(--line-gold); 
+    z-index: 10; 
+}
+
 .unit-identity {
     display: flex;
     flex-direction: column;
