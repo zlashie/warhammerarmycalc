@@ -38,15 +38,21 @@ interface Unit {
 export class ArmyCalcComponent {
   private calcService = inject(CalculatorService);
 
-  armyUnits = signal<Unit[]>([]);
   editingUnit = signal<Unit | null>(null);
   isLoading = signal(false);
+  armyUnits = signal<Unit[]>(this.loadFromStorage());
 
   constructor() {
     effect(() => {
+      localStorage.setItem('warhammer_army', JSON.stringify(this.armyUnits()));
       const units = this.armyUnits();
       console.log('Pipeline Triggered. Sending Army to Backend:', units);
     });
+  }
+
+  private loadFromStorage(): Unit[] {
+    const saved = localStorage.getItem('warhammer_army');
+    return saved ? JSON.parse(saved) : [];
   }
 
   onUnitAdded(newUnit: Unit) {

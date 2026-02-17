@@ -1,11 +1,12 @@
 package com.warhammer.controller;
 
-import com.warhammer.dto.CalculationRequest;
+import com.warhammer.dto.CalculationRequestDTO;
+import com.warhammer.dto.CalculationResultDTO; 
 import com.warhammer.service.CalculatorService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/calc")
+@RequestMapping("/api/calculator")
 @CrossOrigin(origins = "http://localhost:4200")
 public class CalculatorController {
 
@@ -15,8 +16,8 @@ public class CalculatorController {
         this.calculatorService = calculatorService;
     }
 
-    @PostMapping("/increment")
-    public int getIncrement(@RequestBody CalculationRequest request) {
-        return calculatorService.incrementValue(request);
+    @PostMapping("/calculate")
+    public CalculationResultDTO calculateArmy(@RequestBody CalculationRequestDTO request) {
+        return calculatorService.calculateArmy(request);
     }
 }

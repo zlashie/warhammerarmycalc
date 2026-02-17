@@ -3,18 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environments';
 import { Observable } from 'rxjs';
 
-export interface CalculationRequest {
-  inputValue: number;
+export interface ArmyCalculationResult {
+  expectedValue: number;
+  standardDeviation: number;
+  dataPoints: number[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class CalculatorService {
   private http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/calc`;
+  private readonly apiUrl = `${environment.apiUrl}/api/calculator`;
 
-  getIncrement(value: number): Observable<number> {
-    const payload = { inputValue: value }; 
-
-    return this.http.post<number>(`${this.apiUrl}/increment`, payload);
+  calculateArmy(units: any[]): Observable<ArmyCalculationResult> {
+    return this.http.post<ArmyCalculationResult>(`${this.apiUrl}/calculate`, units);
   }
 }
