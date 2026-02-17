@@ -16,9 +16,10 @@ import com.warhammer.util.DiceParser;
 public class CalculatorService {
     private final ProbabilityEngine probabilityEngine;
     private final List<AttackRule> rules;
+    
     public static final int DEFAULT_CRIT = 6;
     public static final int DEFAULT_WOUND = 4;
-    public static final int ZERO = 0;
+    public static final double ZERO = 0.0;
 
     public CalculatorService(ProbabilityEngine probabilityEngine, List<AttackRule> rules) {
         this.probabilityEngine = probabilityEngine;
@@ -39,19 +40,27 @@ public class CalculatorService {
     }
 
     private AttackResult calculateUnitDamage(UnitDTO unit) {
+        // --- PARSING ---
         DiceParser.DiceStat attackStat = DiceParser.parse(unit.stats().attacks());
         DiceParser.DiceStat damageStat = DiceParser.parse(unit.stats().damage());
         double models = DiceParser.parse(unit.stats().models()).mean();
 
-    AttackResult res = new AttackResult(
-        attackStat.mean() * models, attackStat.variance() * models,
-        attackStat.mean() * models, ZERO,
-        damageStat.mean(), damageStat.variance(),
-        DEFAULT_CRIT, ProbabilityEngine.RerollType.NONE, 
-        DEFAULT_CRIT, ProbabilityEngine.RerollType.NONE,
-        ZERO
-    );
+        // Initialize Base Result
+        AttackResult res = new AttackResult(
+            attackStat.mean() * models, 
+            attackStat.variance() * models,
+            attackStat.mean() * models, 
+            ZERO,
+            damageStat.mean(), 
+            damageStat.variance(),
+            DEFAULT_CRIT, 
+            RerollType.NONE, 
+            DEFAULT_CRIT, 
+            RerollType.NONE,
+            ZERO
+        );
 
+        // --- RULE APPLICATION ---
         for (AttackRule rule : rules) {
             if (rule.isApplicable(unit.toggles())) {
                 res = rule.apply(res, unit.toggles(), probabilityEngine);
@@ -61,35 +70,17 @@ public class CalculatorService {
         int bsTarget = parseTarget(unit.stats().bsWs());
 
         // --- HIT RESOLUTION ---
-        double pCrit = probabilityEngine.calculateCritProb(res.critThreshold(), res.hitReroll());
-
-        double pHitTotal;
-        if (res.hitReroll() == RerollType.ALL) {
-            double pCritInitial = probabilityEngine.calculateCritProb(res.critThreshold(), RerollType.NONE);
-            double pHitInitial = probabilityEngine.calculateSuccessProb(bsTarget, RerollType.NONE);
-            
-            pHitTotal = pCritInitial + ((1.0 - pCritInitial) * pHitInitial);
-        } else {
-            pHitTotal = probabilityEngine.calculateSuccessProb(bsTarget, res.hitReroll());
-        }
-
-        double pNormalHit = Math.max(ZERO, pHitTotal - pCrit);
+        double pCritHit = probabilityEngine.calculateCritProb(res.critThreshold(), res.hitReroll());
+        double pHitTotal = probabilityEngine.calculateSuccessProb(bsTarget, res.hitReroll(), res.critThreshold());
+        double pNormalHit = Math.max(ZERO, pHitTotal - pCritHit);
 
         // --- WOUND RESOLUTION ---
         double hitsRollingToWound = res.hitPool() * pNormalHit;
-
+        
         double pCritWound = probabilityEngine.calculateCritProb(res.critWoundThreshold(), res.woundReroll());
-        double pWoundTotal;
+        double pWoundTotal = probabilityEngine.calculateSuccessProb(DEFAULT_WOUND, res.woundReroll(), res.critWoundThreshold());
 
-        if (res.woundReroll() == RerollType.ALL) {
-            double pCritInitial = probabilityEngine.calculateCritProb(res.critWoundThreshold(), RerollType.NONE);
-            double pWoundInitial = probabilityEngine.calculateSuccessProb(DEFAULT_WOUND, RerollType.NONE);
-            pWoundTotal = pCritInitial + ((1.0 - pCritInitial) * pWoundInitial);
-        } else {
-            pWoundTotal = probabilityEngine.calculateSuccessProb(DEFAULT_WOUND, res.woundReroll());
-        }
-
-        double pNormalWound = Math.max(0, pWoundTotal - pCritWound);
+        double pNormalWound = Math.max(ZERO, pWoundTotal - pCritWound);
 
         double normalWounds = hitsRollingToWound * pNormalWound;
         double criticalWounds = hitsRollingToWound * pCritWound;
@@ -97,6 +88,7 @@ public class CalculatorService {
         double devastatingWounds = applyDevastatingWounds(criticalWounds, unit.toggles());
 
         double totalWounds = res.autoWounds() + normalWounds + criticalWounds;
+        
         return res.withFinalWounds(totalWounds);
     }
 
@@ -106,11 +98,10 @@ public class CalculatorService {
         return clean.isEmpty() ? 7 : Integer.parseInt(clean);
     }
 
-    // Placeholder until implemented
     private double applyDevastatingWounds(double criticalWounds, UnitTogglesDTO toggles) {
-    if (toggles.devastating()) {
-        return criticalWounds;
+        if (toggles.devastating()) {
+            return criticalWounds;
+        }
+        return ZERO;
     }
-    return 0.0;
-}
 }
