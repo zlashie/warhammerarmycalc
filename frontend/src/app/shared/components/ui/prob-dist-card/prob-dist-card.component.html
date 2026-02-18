@@ -1,36 +1,34 @@
 <app-card>
   <div class="dist-container">
-    <div class="header" style="padding: 16px 20px 0 20px;">
+    <div class="header">
       <ng-content select="[title]"></ng-content>
     </div>
 
-    <hr class="card-divider" style="margin-top: 12px;">
+    <hr class="card-divider">
 
-        <div class="chart-area">
-            @if (displayData().length > 0) {
-                <div class="bars-wrapper">
-                @for (item of displayData(); track $index) {
-                    <div class="bar-group">
-                        <div class="bar-hitbox" [title]="item.label + ' Hits: ' + (item.value * 100).toFixed(2) + '%'">
-                            <div class="bar" [style.height.%]="(item.value / displayMax()) * 100">
-                                @if ((item.value / displayMax()) > 0.15) {
-                                    <span class="value-label-inner">
-                                        {{ (item.value * 100).toFixed(1) }}%
-                                    </span>
-                                }
-                            </div>
-                        </div>
-                        
-                        <span class="bar-label">
-                            {{ shouldShowLabel($index) ? item.label : '' }}
-                        </span>
-                    </div>
-                }
+    <div class="chart-area">
+      @if (displayData().length > 0) {
+        <div class="bars-wrapper">
+          @for (item of displayData(); track $index) {
+            <div class="bar-group">
+              <div class="bar-hitbox" [title]="item.label + ' Hits: ' + (item.value * 100).toFixed(2) + '%'">
+                <div class="bar" [style.height.%]="(item.value / displayMax()) * 100">
+                  @if ((item.value / displayMax()) > 0.15) {
+                    <span class="value-label-inner">{{ (item.value * 100).toFixed(1) }}%</span>
+                  }
                 </div>
-            } @else {
-                <div class="empty-state">No units in ledger</div>
-            }
+              </div>
+              
+              <span class="bar-label">
+                {{ shouldShowLabel($index) ? item.label : '' }}
+              </span>
+            </div>
+          }
         </div>
+      } @else {
+        <div class="empty-state">No units in ledger</div>
+      }
+    </div>
 
     <hr class="card-divider">
   </div>

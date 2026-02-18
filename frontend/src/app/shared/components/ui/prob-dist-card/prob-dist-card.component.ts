@@ -1,6 +1,13 @@
+// prob-dist-card.component.ts
+
 import { Component, input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardComponent } from '../card/card.component';
+
+interface ChartBar {
+  label: string;
+  value: number;
+}
 
 @Component({
   selector: 'app-prob-dist-card',
@@ -9,60 +16,68 @@ import { CardComponent } from '../card/card.component';
   templateUrl: './prob-dist-card.component.html',
   styleUrl: './prob-dist-card.component.css'
 })
-
 export class ProbDistCardComponent {
   data = input<number[]>([]);
 
-  private readonly MAX_BARS = 40;
-    displayData = computed(() => {
-        const rawData = this.data();
-        if (rawData.length === 0) return [];
+  private readonly CONFIG = {
+    THRESHOLD: 0.0001,
+    MAX_VISIBLE_BARS: 30,
+    LABEL_HEIGHT_RATIO: 0.15
+  };
 
-        const threshold = 0.0001; 
-        let firstIdx = rawData.findIndex(p => p > threshold);
-        let lastIdx = [...rawData].reverse().findIndex(p => p > threshold);
-        
-        lastIdx = lastIdx === -1 ? rawData.length - 1 : (rawData.length - 1 - lastIdx);
-        firstIdx = firstIdx === -1 ? 0 : firstIdx;
+  /**
+   * Main transformation pipeline: Trim -> Bucket -> Map
+   */
+  displayData = computed<ChartBar[]>(() => {
+    const rawData = this.data();
+    if (rawData.length === 0) return [];
 
-        const trimmedData = rawData.slice(firstIdx, lastIdx + 1);
-        
-        const maxVisibleBars = 30;
+    const { first, last } = this.getSignificantIndices(rawData);
+    const trimmed = rawData.slice(first, last + 1);
 
-        if (trimmedData.length <= maxVisibleBars) {
-            return trimmedData.map((prob, i) => ({ 
-                label: (firstIdx + i).toString(), 
-                value: prob 
-            }));
-        }
+    return this.generateBars(trimmed, first);
+  });
 
-        const bucketSize = Math.ceil(trimmedData.length / maxVisibleBars);
-        const result = [];
+  displayMax = computed(() => {
+    const values = this.displayData().map(d => d.value);
+    return Math.max(...values, this.CONFIG.THRESHOLD);
+  });
 
-        for (let i = 0; i < trimmedData.length; i += bucketSize) {
-            const chunk = trimmedData.slice(i, i + bucketSize);
-            const sum = chunk.reduce((a, b) => a + b, 0);
-            
-            const startLabel = firstIdx + i;
-            const endLabel = Math.min(firstIdx + i + bucketSize - 1, firstIdx + trimmedData.length - 1);
-            
-            result.push({ 
-                label: startLabel === endLabel ? `${startLabel}` : `${startLabel}`, 
-                value: sum 
-            });
-        }
-        return result;
-    });
-  
-    shouldShowLabel(index: number): boolean {
-        const total = this.displayData().length;
-        if (total <= 15) return true;
-        if (total <= 30) return index % 5 === 0;
-        return index % 10 === 0;
+  /**
+   * Helper: Find indices where data starts/ends above threshold
+   */
+  private getSignificantIndices(data: number[]) {
+    const first = data.findIndex(p => p > this.CONFIG.THRESHOLD);
+    const last = data.length - 1 - [...data].reverse().findIndex(p => p > this.CONFIG.THRESHOLD);
+    
+    return {
+      first: first === -1 ? 0 : first,
+      last: last >= data.length ? data.length - 1 : last
+    };
+  }
+
+  /**
+   * Helper: Logic for creating bars (direct mapping vs bucketing)
+   */
+  private generateBars(data: number[], offset: number): ChartBar[] {
+    if (data.length <= this.CONFIG.MAX_VISIBLE_BARS) {
+      return data.map((val, i) => ({ label: (offset + i).toString(), value: val }));
     }
 
-    displayMax = computed(() => {
-    const vals = this.displayData().map(d => d.value);
-    return vals.length > 0 ? Math.max(...vals, 0.0001) : 0.0001;
+    const bucketSize = Math.ceil(data.length / this.CONFIG.MAX_VISIBLE_BARS);
+    return Array.from({ length: Math.ceil(data.length / bucketSize) }, (_, i) => {
+      const chunk = data.slice(i * bucketSize, (i + 1) * bucketSize);
+      return {
+        label: (offset + (i * bucketSize)).toString(),
+        value: chunk.reduce((sum, v) => sum + v, 0)
+      };
     });
+  }
+
+  shouldShowLabel(index: number): boolean {
+    const total = this.displayData().length;
+    if (total <= 15) return true;
+    if (total <= 30) return index % 5 === 0;
+    return index % 10 === 0;
+  }
 }
