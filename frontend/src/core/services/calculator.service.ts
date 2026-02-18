@@ -3,10 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface CalcResult {
-  unitName: string;
-  expectedValue: number;
-  standardDeviation: number;
-  maxPossibleValue: number;
+  probabilities: number[]; 
+  maxHits: number;
 }
 
 @Injectable({

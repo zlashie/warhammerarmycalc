@@ -13,67 +13,8 @@
         </app-ledger-card>
     </div>
 
-    <app-card>
-        <div class="card-content-wrapper">
-            <h3>Total Hits Distribution</h3>
-            <hr class="card-divider">
-            
-            <div class="chart-area">
-                <div class="y-axis-label">Probability</div>
-
-                <div class="graph-wrapper">
-                    <div class="svg-container" style="position: relative;">
-                        <svg viewBox="0 0 400 200" class="distribution-graph" preserveAspectRatio="none">
-                            @if (calcResult()) {
-                                <path [attr.d]="graphState().linePath" class="curve-line" fill="none" />
-
-                                @for (line of deviationLines(); track $index) {
-                                    <line 
-                                        [attr.x1]="line.xPos" 
-                                        y1="10" 
-                                        [attr.x2]="line.xPos" 
-                                        y2="185" 
-                                        [class.mean-line]="line.isMean"
-                                        [class.std-line]="!line.isMean" />
-                                }
-                            } @else {
-                                <line x1="0" y1="185" x2="400" y2="185" stroke="#ccc" stroke-dasharray="4" />
-                            }
-                        </svg>
-
-                        <div class="floating-labels-container">
-                            @for (line of deviationLines(); track $index) {
-                                <div class="std-label-group" [style.left.%]="(line.xPos / 400) * 100">
-                                    <span class="std-val">{{ line.value }}</span>
-                                    <span class="std-tag">{{ line.label }}</span>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    <div class="x-axis-base">
-                        <span class="limit-label">0</span>
-                        <span class="limit-label">Max: {{ calcResult()?.maxPossibleValue }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <hr class="card-divider">
-
-            <div class="stats-footer">
-                <div class="mini-stat">
-                    <span class="stat-label">Expected Value (E)</span>
-                    <span class="highlight-val">
-                        {{ isLoading() ? '...' : (calcResult()?.expectedValue || '0') }}
-                    </span>
-                </div>
-                <div class="mini-stat">
-                    <span class="stat-label">Std. Deviation (σ)</span>
-                    <span class="highlight-val">
-                        {{ isLoading() ? '...' : (calcResult()?.standardDeviation || '0') }}
-                    </span>
-                </div>
-            </div>
+    <div class="results-column">
+        <app-hit-dist-card></app-hit-dist-card>
+        
         </div>
-    </app-card>
 </div>
