@@ -6,7 +6,7 @@
 .card-divider {
     border: 0;
     border-top: 1px solid #e0e0e0; 
-    margin: 20px 0;
+    margin: 0;
     width: 100%;
 }
 
@@ -21,7 +21,7 @@
     flex: 1;
     display: flex;
     align-items: flex-end;
-    padding-bottom: 20px;
+    padding: 20px 10px; 
     min-height: 0; 
     width: 100%;
     overflow: hidden;
@@ -32,7 +32,7 @@
     align-items: flex-end;
     width: 100%;
     height: 100%;
-    gap: 8px; 
+    gap: 2px; 
 }
 
 .bar-group {
@@ -42,25 +42,24 @@
     align-items: center;
     height: 100%;
     justify-content: flex-end;
-    min-width: 0; 
+    min-width: 2px;
 }
 
 .bar-hitbox {
     width: 100%;
     height: 100%;
+    background: #f5f5f5; 
+    border-radius: 50px; 
+    overflow: hidden;
+    position: relative;
     display: flex;
     align-items: flex-end;
-    cursor: help;
-    background: #f5f5f5; 
-    border-radius: 20px;
-    position: relative;
-    overflow: hidden;
 }
 
 .bar {
     width: 100%;
     background: #e1ad01;
-    border-radius: 20px;
+    border-radius: 50px;
     transition: height 0.3s ease;
 }
 
@@ -69,6 +68,7 @@
     font-weight: 700;
     color: #e1ad01; 
     margin-top: 10px;
+    min-height: 1.2em;
 }
 
 .empty-state {

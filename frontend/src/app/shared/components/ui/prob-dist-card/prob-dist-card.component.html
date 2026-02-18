@@ -1,32 +1,31 @@
 <app-card>
   <div class="dist-container">
-    <div class="header">
+    <div class="header" style="padding: 16px 20px 0 20px;">
       <ng-content select="[title]"></ng-content>
     </div>
 
-    <hr class="card-divider">
+    <hr class="card-divider" style="margin-top: 12px;">
 
     <div class="chart-area">
-      @if (data().length > 0) {
+    @if (displayData().length > 0) {
         <div class="bars-wrapper">
-          @for (prob of data(); track $index) {
+        @for (item of displayData(); track $index) {
             <div class="bar-group">
-              <div class="bar-hitbox" [title]="$index + ' Hits: ' + (prob * 100).toFixed(2) + '%'">
-                <div 
-                  class="bar" 
-                  [style.height.%]="(prob / maxProb()) * 100">
-                </div>
-              </div>
-              <span class="bar-label">{{ $index }}</span>
+            <div class="bar-hitbox" [title]="item.label + ' Hits: ' + (item.value * 100).toFixed(2) + '%'">
+                <div class="bar" [style.height.%]="(item.value / displayMax()) * 100"></div>
             </div>
-          }
+            
+            <span class="bar-label">
+                {{ shouldShowLabel($index) ? item.label : '' }}
+            </span>
+            </div>
+        }
         </div>
-      } @else {
+    } @else {
         <div class="empty-state">No units in ledger</div>
-      }
+    }
     </div>
 
     <hr class="card-divider">
-
   </div>
 </app-card>
