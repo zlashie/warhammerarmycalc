@@ -16,8 +16,13 @@ export class HitDistCardComponent {
   
   probabilities = computed(() => this.parent.calcResult()?.probabilities || []);
   
-stats = computed(() => {
+  stats = computed(() => {
     const res = this.parent.calcResult();
     return res as any; 
+  });
+
+  displayTitle = computed(() => {
+    const selected = this.parent.editingUnit();
+    return selected ? `Hits: ${selected.name}` : 'Army Total Hits';
   });
 }

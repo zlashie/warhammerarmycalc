@@ -37,44 +37,47 @@ export class ArmyCalcComponent {
     });
   }
 
-  private performArmyCalculation() {
-    const units = this.armyUnits();
-    if (!units || units.length === 0) {
-      this.calcResult.set(null);
-      return;
-    }
+private performArmyCalculation() {
+  const units = this.armyUnits();
+  const selected = this.editingUnit(); 
 
-    this.isLoading.set(true);
-    
-    try {
-      const payload = units.map(u => {
-        const stats = u.stats || {};
-        
-        const rawBs = String(stats.bsWs || '').replace(/[^0-9]/g, '');
-        
-        return {
-          unitName: u.name || 'Unnamed Unit',
-          numberOfModels: parseInt(stats.models) || 0,
-          attacksPerModel: parseInt(stats.attacks) || 0,
-          bsValue: parseInt(rawBs) || 0
-        };
-      });
+  const unitsToCalculate = selected ? [selected] : units;
 
-      this.calcService.calculate(payload).subscribe({
-        next: (res) => {
-          this.calcResult.set(res);
-          this.isLoading.set(false);
-        },
-        error: (err) => {
-          console.error('Backend rejected the data:', err);
-          this.isLoading.set(false);
-        }
-      });
-    } catch (e) {
-      console.error('Mapping failed - check unit structure:', e);
-      this.isLoading.set(false);
-    }
+  if (unitsToCalculate.length === 0) {
+    this.calcResult.set(null);
+    return;
   }
+
+  this.isLoading.set(true);
+
+  try {
+    const payload = unitsToCalculate.map(u => {
+      const stats = u.stats || {};
+      const rawBs = String(stats.bsWs || '').replace(/[^0-9]/g, '');
+      
+      return {
+        unitName: u.name || 'Unnamed Unit',
+        numberOfModels: parseInt(stats.models) || 0,
+        attacksPerModel: parseInt(stats.attacks) || 0,
+        bsValue: parseInt(rawBs) || 0,
+      };
+    });
+
+    this.calcService.calculate(payload).subscribe({
+      next: (res) => {
+        this.calcResult.set(res);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Backend rejected the data:', err);
+        this.isLoading.set(false);
+      }
+    });
+  } catch (e) {
+    console.error('Mapping failed', e);
+    this.isLoading.set(false);
+  }
+}
   
   private loadFromStorage(): any[] {
     const saved = localStorage.getItem('warhammer_army');
