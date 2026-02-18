@@ -1,6 +1,5 @@
 import { Component, signal, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CardComponent } from '../../shared/components/ui/card/card.component';
 import { CalculatorService, CalcResult } from '../../../core/services/calculator.service';
 import { AddUnitCardComponent } from './components/add-unit-card/add-unit-card.component';
 import { LedgerCardComponent } from './components/ledger-card/ledger-card.component';
@@ -10,8 +9,7 @@ import { HitDistCardComponent } from './components/hit-dist-card/hit-dist-card.c
   selector: 'app-army-calc',
   standalone: true,
   imports: [
-    CommonModule, 
-    CardComponent, 
+    CommonModule,  
     AddUnitCardComponent, 
     LedgerCardComponent, 
     HitDistCardComponent
@@ -41,22 +39,44 @@ export class ArmyCalcComponent {
   }
 
   private performArmyCalculation() {
+    const units = this.armyUnits();
+    if (!units || units.length === 0) {
+      this.calcResult.set(null);
+      return;
+    }
+
     this.isLoading.set(true);
     
-    const payload = this.armyUnits().map(u => ({
-      unitName: u.name,
-      numberOfModels: parseInt(u.stats.models) || 0,
-      attacksPerModel: parseInt(u.stats.attacks) || 0,
-      bsValue: parseInt(u.stats.bsWs) || 0
-    }));
+    try {
+      const payload = units.map(u => {
+        // Defensive check: handle string values and missing stats safely
+        const stats = u.stats || {};
+        
+        // Extract just the number from "4+" or similar strings
+        const rawBs = String(stats.bsWs || '').replace(/[^0-9]/g, '');
+        
+        return {
+          unitName: u.name || 'Unnamed Unit',
+          numberOfModels: parseInt(stats.models) || 0,
+          attacksPerModel: parseInt(stats.attacks) || 0,
+          bsValue: parseInt(rawBs) || 0
+        };
+      });
 
-    this.calcService.calculate(payload).subscribe({
-      next: (res) => {
-        this.calcResult.set(res);
-        this.isLoading.set(false);
-      },
-      error: () => this.isLoading.set(false)
-    });
+      this.calcService.calculate(payload).subscribe({
+        next: (res) => {
+          this.calcResult.set(res);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error('Backend rejected the data:', err);
+          this.isLoading.set(false);
+        }
+      });
+    } catch (e) {
+      console.error('Mapping failed - check unit structure:', e);
+      this.isLoading.set(false);
+    }
   }
   
   private loadFromStorage(): any[] {
@@ -65,12 +85,18 @@ export class ArmyCalcComponent {
   }
 
   onSaveUnit(unit: any) {
-    if (unit.id) {
-      this.armyUnits.update(units => units.map(u => u.id === unit.id ? unit : u));
-    } else {
-      unit.id = Date.now();
-      this.armyUnits.update(units => [unit, ...units]);
-    }
+    // Use a fresh object reference to ensure the signal triggers correctly
+    const unitToSave = { ...unit };
+    
+    this.armyUnits.update(units => {
+      if (unitToSave.id && units.some(u => u.id === unitToSave.id)) {
+        return units.map(u => u.id === unitToSave.id ? unitToSave : u);
+      } else {
+        // Ensure it has an ID before hitting the signal
+        unitToSave.id = unitToSave.id || Date.now();
+        return [unitToSave, ...units];
+      }
+    });
     this.editingUnit.set(null);
   }
 
