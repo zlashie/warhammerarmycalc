@@ -46,6 +46,41 @@ export class ProbDistCardComponent {
   });
 
   /**
+   * Data: displayed data
+   */
+  displayStats = computed(() => {
+    const s = this.stats();
+    if (!s) return [];
+
+    return [
+      {
+        value: Math.round(s.avgValue),
+        label: 'Avg Hits',
+        sub: `${Math.round(s.avgProb)}% Probability`,
+        cssClass: ''
+      },
+      {
+        value: `${Math.round(s.probAtLeastAvg)}%`,
+        label: 'Prob ≥ Avg',
+        sub: 'Success',
+        cssClass: ''
+      },
+      {
+        value: s.range80,
+        label: '80% Range',
+        sub: 'Reliable',
+        cssClass: s.range80?.length > 3 ? 'long-value' : ''
+      },
+      {
+        value: s.rangeTop5,
+        label: 'Top 5%',
+        sub: 'Lucky Roll',
+        cssClass: s.rangeTop5?.length > 3 ? 'long-value' : ''
+      }
+    ];
+  });
+
+  /**
    * Helper: Find indices where data starts/ends above threshold
    */
   private getSignificantIndices(data: number[]) {
