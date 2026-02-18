@@ -7,11 +7,8 @@ import { ArmyCalcComponent } from '../../army-calc.component';
   selector: 'app-hit-dist-card',
   standalone: true,
   imports: [CommonModule, ProbDistCardComponent],
-  template: `
-    <app-prob-dist-card [data]="probabilities()">
-      <h3 title>Hit Distribution</h3>
-    </app-prob-dist-card>
-  `
+  templateUrl: './hit-dist-card.component.html',
+  styleUrl: './hit-dist-card.component.css'
 })
 export class HitDistCardComponent {
   private parent = inject(ArmyCalcComponent);

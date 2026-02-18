@@ -1,0 +1,29 @@
+<app-card>
+  <div class="dist-container">
+    <div class="header">
+      <ng-content select="[title]"></ng-content>
+    </div>
+
+    <hr class="card-divider">
+
+    <div class="chart-area">
+      @if (data().length > 0) {
+        <div class="bars-wrapper">
+          @for (prob of data(); track $index) {
+            <div class="bar-group">
+              <div class="bar-hitbox" [title]="$index + ' Hits: ' + (prob * 100).toFixed(2) + '%'">
+                <div 
+                  class="bar" 
+                  [style.height.%]="(prob / maxProb()) * 100">
+                </div>
+              </div>
+              <span class="bar-label">{{ $index }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">No units in ledger</div>
+      }
+    </div>
+  </div>
+</app-card>
