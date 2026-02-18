@@ -12,7 +12,7 @@
 }
 
 .progress-ring__circle {
-    transition: stroke-dashoffset 0.35s;
+    transition: stroke-dashoffset 0.35s, stroke 0.3s ease; 
     transform-origin: 50% 50%;
 }
 
@@ -29,6 +29,7 @@
     font-size: 0.75rem;
     font-weight: 800;
     color: var(--line-gold);
+    transition: color 0.3s ease;
 }
 
 .limit-label {
@@ -36,4 +37,12 @@
     font-weight: 700;
     text-transform: uppercase;
     color: #888;
+}
+
+.is-over-limit .progress-ring__circle {
+    stroke: #ff5a5a;
+}
+
+.is-over-limit .current-val {
+    color: #ff5a5a;
 }

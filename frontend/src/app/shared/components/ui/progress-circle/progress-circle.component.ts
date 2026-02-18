@@ -15,10 +15,10 @@ export class ProgressCircleComponent {
   radius = 18;
   circumference = 2 * Math.PI * this.radius;
 
+  isOverLimit = computed(() => this.value() > this.max());
+
   offset = computed(() => {
     const progress = Math.min(this.value() / this.max(), 1);
     return this.circumference * (1 - progress);
   });
-
-  percentage = computed(() => Math.round((this.value() / this.max()) * 100));
 }
