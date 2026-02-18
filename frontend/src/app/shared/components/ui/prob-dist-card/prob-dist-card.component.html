@@ -44,14 +44,6 @@
 
         <div class="stat-orb-wrapper">
           <div class="orb active">
-            {{ stats()?.range80 }}
-          </div>
-          <div class="orb-label">80% Range</div>
-          <div class="orb-sub">Reliable</div>
-        </div>
-
-        <div class="stat-orb-wrapper">
-          <div class="orb active">
             {{ Math.round(stats()?.probAtLeastAvg) }}%
           </div>
           <div class="orb-label">Prob ≥ Avg</div>
@@ -59,7 +51,15 @@
         </div>
 
         <div class="stat-orb-wrapper">
-          <div class="orb active">
+          <div class="orb active" [class.long-value]="stats()?.range80?.length > 3">
+            {{ stats()?.range80 }}
+          </div>
+          <div class="orb-label">80% Range</div>
+          <div class="orb-sub">Reliable</div>
+        </div>
+
+        <div class="stat-orb-wrapper">
+          <div class="orb active" [class.long-value]="stats()?.rangeTop5?.length > 3">
             {{ stats()?.rangeTop5 }}
           </div>
           <div class="orb-label">Top 5%</div>

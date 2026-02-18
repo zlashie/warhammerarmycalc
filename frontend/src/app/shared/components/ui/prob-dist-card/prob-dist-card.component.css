@@ -112,24 +112,32 @@
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    width: 25%; 
+    flex: 1;
+    min-width: 0;
 }
 
 .orb {
     width: 60px;  
     height: 60px;
-    border-radius: 50%;
+    padding: 0 10px;
+    border-radius: 30px;
     border: 4px solid #e1ad01;
     color: #e1ad01;
-    
     display: flex;
     align-items: center;
     justify-content: center;
-    
-    font-size: 1rem;
+    font-size: 1.3rem;
     font-weight: 800;
     box-shadow: 0 4px 10px rgba(225, 173, 1, 0.1);
+    box-sizing: border-box;
+    white-space: nowrap;
     transition: all 0.2s ease;
+}
+
+.orb.long-value {
+    font-size: 0.75rem;
+    font-weight: 900;
+    -webkit-text-stroke: 0.2px #e1ad01;
 }
 
 .orb-label {
