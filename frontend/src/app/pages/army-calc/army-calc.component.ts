@@ -99,7 +99,7 @@ export class ArmyCalcComponent {
     this.armyUnits.update(units => units.filter(u => u.id !== id));
   }
 
-  onEditUnit(unit: any) {
-    this.editingUnit.set(unit);
+  onEditUnit(unit: any | null) {
+    this.editingUnit.set(unit); 
   }
 }

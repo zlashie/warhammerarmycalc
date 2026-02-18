@@ -111,11 +111,13 @@
     font-size: 1.5rem;
     border: 2px solid #ff4444;
     color: #ff4444;
+    transition: all 0.2s ease;
 }
 
 .clear-btn:hover {
-    border-color: var(--text-muted);
-    color: var(--text-muted);
+    background-color: #ff5a5a; 
+    border-color: #ff5a5a;
+    color: white;
 }
 
 .popup-arrow {

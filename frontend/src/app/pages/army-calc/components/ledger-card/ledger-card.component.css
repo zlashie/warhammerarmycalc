@@ -117,6 +117,19 @@
     transition: all 0.2s ease;
     padding: 0;
     line-height: 1;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+
+.ledger-row:hover .row-delete {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ledger-row.is-editing .row-delete {
+    opacity: 1;
+    visibility: visible;
 }
 
 .row-delete:hover {

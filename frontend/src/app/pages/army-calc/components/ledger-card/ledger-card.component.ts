@@ -14,7 +14,8 @@ export class LedgerCardComponent {
   activeUnit = input<any | null>(null);
   
   deleteUnit = output<number>();
-  editUnit = output<any>(); 
+
+  editUnit = output<any | null>(); 
 
   onDelete(id: number, event: MouseEvent) {
     event.stopPropagation();
@@ -22,6 +23,12 @@ export class LedgerCardComponent {
   }
 
   onEdit(unit: any) {
-    this.editUnit.emit(unit);
+    const currentActive = this.activeUnit();
+    
+    if (currentActive && currentActive.id === unit.id) {
+      this.editUnit.emit(null);
+    } else {
+      this.editUnit.emit(unit);
+    }
   }
 }

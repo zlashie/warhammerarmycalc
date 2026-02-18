@@ -9,7 +9,7 @@
     <div class="ledger-list">
       @for (unit of units(); track unit.id) {
         <div class="ledger-row" 
-        [class.is-editing]="activeUnit() && unit.id === activeUnit().id"
+        [class.is-editing]="activeUnit()?.id === unit.id"
         (click)="onEdit(unit)">
           
           <div class="unit-identity">
