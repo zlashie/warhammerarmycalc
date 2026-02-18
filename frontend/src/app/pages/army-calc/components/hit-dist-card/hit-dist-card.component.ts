@@ -10,7 +10,14 @@ import { ArmyCalcComponent } from '../../army-calc.component';
   templateUrl: './hit-dist-card.component.html',
   styleUrl: './hit-dist-card.component.css'
 })
+
 export class HitDistCardComponent {
   private parent = inject(ArmyCalcComponent);
+  
   probabilities = computed(() => this.parent.calcResult()?.probabilities || []);
+  
+stats = computed(() => {
+    const res = this.parent.calcResult();
+    return res as any; 
+  });
 }

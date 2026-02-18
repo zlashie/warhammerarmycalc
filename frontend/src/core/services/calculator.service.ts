@@ -5,6 +5,14 @@ import { Observable } from 'rxjs';
 export interface CalcResult {
   probabilities: number[]; 
   maxHits: number;
+  avgValue: number;
+  avgProb: number;
+  range80: string;
+  rangeStd: string;
+  maxProbValue: number;
+  maxProbPercent: number;
+  probAtLeastAvg: number;
+  rangeTop5: string;
 }
 
 @Injectable({

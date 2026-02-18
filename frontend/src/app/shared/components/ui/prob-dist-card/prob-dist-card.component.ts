@@ -18,6 +18,7 @@ interface ChartBar {
 })
 export class ProbDistCardComponent {
   data = input<number[]>([]);
+  stats = input<any | null>(null);
 
   private readonly CONFIG = {
     THRESHOLD: 0.0001,

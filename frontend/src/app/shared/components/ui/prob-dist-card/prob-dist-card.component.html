@@ -30,6 +30,35 @@
       }
     </div>
 
-    <hr class="card-divider">
+    @if (stats()) {
+      <hr class="card-divider">
+
+        <div class="stats-grid">
+          <div class="stats-col">
+            <div class="stat-item"><span class="label">Avg Value:</span> <b>{{ stats()?.avgValue }}</b></div>
+            <div class="stat-item"><span class="label">Avg Prob:</span> <b>{{ stats()?.avgProb }}%</b></div>
+          </div>
+          
+          <div class="stats-col">
+            <div class="stat-item"><span class="label">80% Range:</span> <b>{{ stats()?.range80 }}</b></div>
+            <div class="stat-item"><span class="label">Std Range:</span> <b>{{ stats()?.rangeStd }}</b></div>
+          </div>
+
+          <div class="stats-col">
+            <div class="stat-item">
+                <span class="label">Prob ≥ Avg:</span> 
+                <b [style.color]="stats()?.probAtLeastAvg! > 50 ? '#4caf50' : '#f44336'">
+                    {{ stats()?.probAtLeastAvg }}%
+                </b>
+            </div>
+            <div class="stat-item">
+              <span class="label">Top 5% (Luck):</span> 
+              <b class="highlight-luck">{{ stats()?.rangeTop5 }}</b>
+            </div>
+          </div>
+        </div>
+
+    }
+    
   </div>
 </app-card>
