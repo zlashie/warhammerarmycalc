@@ -25,6 +25,7 @@
     min-height: 0; 
     width: 100%;
     overflow: hidden;
+    position: relative;
 }
 
 .bars-wrapper {

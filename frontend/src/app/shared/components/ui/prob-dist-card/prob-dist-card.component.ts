@@ -16,23 +16,40 @@ export class ProbDistCardComponent {
   private readonly MAX_BARS = 40;
     displayData = computed(() => {
         const rawData = this.data();
-        const maxVisibleBars = 30; 
+        if (rawData.length === 0) return [];
 
-        if (rawData.length <= maxVisibleBars) {
-            return rawData.map((prob, i) => ({ label: i.toString(), value: prob }));
+        const threshold = 0.0001; 
+        let firstIdx = rawData.findIndex(p => p > threshold);
+        let lastIdx = [...rawData].reverse().findIndex(p => p > threshold);
+        
+        lastIdx = lastIdx === -1 ? rawData.length - 1 : (rawData.length - 1 - lastIdx);
+        firstIdx = firstIdx === -1 ? 0 : firstIdx;
+
+        const trimmedData = rawData.slice(firstIdx, lastIdx + 1);
+        
+        const maxVisibleBars = 30;
+
+        if (trimmedData.length <= maxVisibleBars) {
+            return trimmedData.map((prob, i) => ({ 
+                label: (firstIdx + i).toString(), 
+                value: prob 
+            }));
         }
 
-        const bucketSize = Math.ceil(rawData.length / maxVisibleBars);
+        const bucketSize = Math.ceil(trimmedData.length / maxVisibleBars);
         const result = [];
 
-        for (let i = 0; i < rawData.length; i += bucketSize) {
-            const chunk = rawData.slice(i, i + bucketSize);
+        for (let i = 0; i < trimmedData.length; i += bucketSize) {
+            const chunk = trimmedData.slice(i, i + bucketSize);
             const sum = chunk.reduce((a, b) => a + b, 0);
             
-            const end = Math.min(i + bucketSize - 1, rawData.length - 1);
-            const label = i === end ? i.toString() : `${i}`; 
+            const startLabel = firstIdx + i;
+            const endLabel = Math.min(firstIdx + i + bucketSize - 1, firstIdx + trimmedData.length - 1);
             
-            result.push({ label, value: sum });
+            result.push({ 
+                label: startLabel === endLabel ? `${startLabel}` : `${startLabel}`, 
+                value: sum 
+            });
         }
         return result;
     });
