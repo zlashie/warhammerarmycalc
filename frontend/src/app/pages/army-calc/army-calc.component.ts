@@ -26,7 +26,6 @@ export class ArmyCalcComponent {
   isLoading = signal(false);
 
   constructor() {
-    // Automatically recalculate whenever the army changes
     effect(() => {
       const units = this.armyUnits();
       localStorage.setItem('warhammer_army', JSON.stringify(units));
@@ -49,10 +48,8 @@ export class ArmyCalcComponent {
     
     try {
       const payload = units.map(u => {
-        // Defensive check: handle string values and missing stats safely
         const stats = u.stats || {};
         
-        // Extract just the number from "4+" or similar strings
         const rawBs = String(stats.bsWs || '').replace(/[^0-9]/g, '');
         
         return {
@@ -85,14 +82,12 @@ export class ArmyCalcComponent {
   }
 
   onSaveUnit(unit: any) {
-    // Use a fresh object reference to ensure the signal triggers correctly
     const unitToSave = { ...unit };
     
     this.armyUnits.update(units => {
       if (unitToSave.id && units.some(u => u.id === unitToSave.id)) {
         return units.map(u => u.id === unitToSave.id ? unitToSave : u);
       } else {
-        // Ensure it has an ID before hitting the signal
         unitToSave.id = unitToSave.id || Date.now();
         return [unitToSave, ...units];
       }
