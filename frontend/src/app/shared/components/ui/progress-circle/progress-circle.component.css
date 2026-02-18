@@ -1,0 +1,39 @@
+.progress-container {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+}
+
+.progress-ring__circle {
+    transition: stroke-dashoffset 0.35s;
+    transform-origin: 50% 50%;
+}
+
+.value-overlay {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.current-val {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--line-gold);
+}
+
+.limit-label {
+    font-size: 0.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #888;
+}

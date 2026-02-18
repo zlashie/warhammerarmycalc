@@ -6,8 +6,9 @@
         </app-add-unit-card>
 
         <app-ledger-card 
-            [units]="armyUnits()" 
+            [units]="armyUnits() || []" 
             [activeUnit]="editingUnit()" 
+            [totalPoints]="totalPoints()"
             (editUnit)="onEditUnit($event)"
             (deleteUnit)="removeUnit($event)">
         </app-ledger-card>

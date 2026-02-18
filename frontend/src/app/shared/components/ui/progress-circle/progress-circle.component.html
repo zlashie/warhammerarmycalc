@@ -1,0 +1,27 @@
+<div class="progress-container">
+  <svg class="progress-ring" width="44" height="44">
+    <circle
+      class="progress-ring__background"
+      stroke="#e0e0e0"
+      stroke-width="4"
+      fill="transparent"
+      r="18"
+      cx="22"
+      cy="22"/>
+    <circle
+      class="progress-ring__circle"
+      stroke="#e1ad01"
+      stroke-width="5"
+      stroke-linecap="round"
+      fill="transparent"
+      [style.strokeDasharray]="circumference"
+      [style.strokeDashoffset]="offset()"
+      r="18"
+      cx="22"
+      cy="22"/>
+  </svg>
+  <div class="value-overlay">
+    <span class="current-val">{{ value() }}</span>
+    <span class="limit-label">pts</span>
+  </div>
+</div>

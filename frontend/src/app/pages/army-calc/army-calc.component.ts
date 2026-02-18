@@ -1,4 +1,4 @@
-import { Component, signal, inject, effect } from '@angular/core';
+import { Component, signal, inject, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalculatorService, CalcResult } from '../../../core/services/calculator.service';
 import { AddUnitCardComponent } from './components/add-unit-card/add-unit-card.component';
@@ -25,6 +25,13 @@ export class ArmyCalcComponent {
 
   armyUnits = this.store.units;
   editingUnit = this.store.selectedUnit;
+
+  totalPoints = computed(() => {
+    return this.armyUnits().reduce((sum, unit) => {
+      const pts = parseFloat(unit.points) || 0;
+      return sum + pts;
+    }, 0);
+  });
   
   calcResult = signal<CalcResult | null>(null);
   isLoading = signal(false);
