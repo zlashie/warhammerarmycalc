@@ -17,6 +17,7 @@ interface ChartBar {
   styleUrl: './prob-dist-card.component.css'
 })
 export class ProbDistCardComponent {
+  protected readonly Math = Math;
   data = input<number[]>([]);
   stats = input<any | null>(null);
 

@@ -32,32 +32,41 @@
 
     @if (stats()) {
       <hr class="card-divider">
-
-        <div class="stats-grid">
-          <div class="stats-col">
-            <div class="stat-item"><span class="label">Avg Value:</span> <b>{{ stats()?.avgValue }}</b></div>
-            <div class="stat-item"><span class="label">Avg Prob:</span> <b>{{ stats()?.avgProb }}%</b></div>
+      <div class="stats-dashboard">
+        
+        <div class="stat-orb-wrapper">
+          <div class="orb active">
+            {{ Math.round(stats()?.avgValue) }}
           </div>
-          
-          <div class="stats-col">
-            <div class="stat-item"><span class="label">80% Range:</span> <b>{{ stats()?.range80 }}</b></div>
-            <div class="stat-item"><span class="label">Std Range:</span> <b>{{ stats()?.rangeStd }}</b></div>
-          </div>
-
-          <div class="stats-col">
-            <div class="stat-item">
-                <span class="label">Prob ≥ Avg:</span> 
-                <b [style.color]="stats()?.probAtLeastAvg! > 50 ? '#4caf50' : '#f44336'">
-                    {{ stats()?.probAtLeastAvg }}%
-                </b>
-            </div>
-            <div class="stat-item">
-              <span class="label">Top 5% (Luck):</span> 
-              <b class="highlight-luck">{{ stats()?.rangeTop5 }}</b>
-            </div>
-          </div>
+          <div class="orb-label">Avg Hits</div>
+          <div class="orb-sub">{{ Math.round(stats()?.avgProb) }}% Probability</div>
         </div>
 
+        <div class="stat-orb-wrapper">
+          <div class="orb active">
+            {{ stats()?.range80 }}
+          </div>
+          <div class="orb-label">80% Range</div>
+          <div class="orb-sub">Reliable</div>
+        </div>
+
+        <div class="stat-orb-wrapper">
+          <div class="orb active">
+            {{ Math.round(stats()?.probAtLeastAvg) }}%
+          </div>
+          <div class="orb-label">Prob ≥ Avg</div>
+          <div class="orb-sub">Success</div>
+        </div>
+
+        <div class="stat-orb-wrapper">
+          <div class="orb active luck-glow">
+            {{ stats()?.rangeTop5 }}
+          </div>
+          <div class="orb-label">Top 5%</div>
+          <div class="orb-sub">Lucky Roll</div>
+        </div>
+
+      </div>
     }
     
   </div>
