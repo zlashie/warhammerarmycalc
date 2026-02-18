@@ -1,20 +1,22 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environments';
 import { Observable } from 'rxjs';
 
-export interface ArmyCalculationResult {
+export interface CalcResult {
+  unitName: string;
   expectedValue: number;
   standardDeviation: number;
-  dataPoints: number[];
+  maxPossibleValue: number;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class CalculatorService {
   private http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/api/calculator`;
+  private apiUrl = 'http://localhost:8080/api/calculate';
 
-  calculateArmy(units: any[]): Observable<ArmyCalculationResult> {
-    return this.http.post<ArmyCalculationResult>(`${this.apiUrl}/calculate`, units);
+  calculate(requests: any[]): Observable<CalcResult> {
+    return this.http.post<CalcResult>(this.apiUrl, requests);
   }
 }

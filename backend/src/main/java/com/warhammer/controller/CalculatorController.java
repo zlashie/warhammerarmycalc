@@ -1,13 +1,14 @@
 package com.warhammer.controller;
 
 import com.warhammer.dto.CalculationRequestDTO;
-import com.warhammer.dto.CalculationResultDTO; 
+import com.warhammer.dto.CalculationResultDTO;
 import com.warhammer.service.CalculatorService;
 import org.springframework.web.bind.annotation.*;
+import java.util.List; 
 
 @RestController
-@RequestMapping("/api/calculator")
-@CrossOrigin(origins = "http://localhost:4200")
+@RequestMapping("/api/calculate")
+@CrossOrigin(origins = "*") 
 public class CalculatorController {
 
     private final CalculatorService calculatorService;
@@ -16,8 +17,8 @@ public class CalculatorController {
         this.calculatorService = calculatorService;
     }
 
-    @PostMapping("/calculate")
-    public CalculationResultDTO calculateArmy(@RequestBody CalculationRequestDTO request) {
-        return calculatorService.calculateArmy(request);
+    @PostMapping
+    public CalculationResultDTO calculate(@RequestBody List<CalculationRequestDTO> requests) {
+        return calculatorService.calculateArmyHits(requests);
     }
 }
