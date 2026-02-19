@@ -45,7 +45,7 @@ public class CalculatorService {
         double[] totalWoundDistribution = WoundProcessor.calculateWoundDistribution(totalHitDistribution, 4);
 
         // --- STAGE 3: DAMAGE ---
-        String damageValue = requests.get(0).getDamageValue();
+        String damageValue = (requests != null && !requests.isEmpty()) ? requests.get(0).getDamageValue() : "1";
         double[] totalDamageDistribution = DamageProcessor.calculateDamageDistribution(totalWoundDistribution, damageValue);
         
 
@@ -58,7 +58,6 @@ public class CalculatorService {
         result.setDamageProbabilities(convertToRoundedList(totalDamageDistribution));
         
         // 3. Perform statistical analysis for BOTH phases
-        // This fills avgValue, range80 (hits) AND woundAvgValue, woundRange80 (wounds)
         DistributionAnalyzer.enrichHits(result, totalHitDistribution);
         DistributionAnalyzer.enrichWounds(result, totalWoundDistribution);
         DistributionAnalyzer.enrichDamage(result, totalDamageDistribution);

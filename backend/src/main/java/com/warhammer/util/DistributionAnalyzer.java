@@ -58,7 +58,7 @@ public class DistributionAnalyzer {
      */
     public static void enrichDamage(CalculationResultDTO dto, double[] dist) {
         AnalysisResult stats = performAnalysis(dist);
-
+        
         dto.setDamageAvgValue(stats.mean);
         dto.setDamageProbAtLeastAvg(stats.probAtLeastAvg);
         dto.setDamageRange80(stats.range80);
