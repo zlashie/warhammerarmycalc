@@ -10,21 +10,13 @@ import { ArmyCalcComponent } from '../../army-calc.component';
   templateUrl: './wound-dist-card.component.html',
   styleUrl: './wound-dist-card.component.css'
 })
+
 export class WoundDistCardComponent {
   private parent = inject(ArmyCalcComponent);
 
   probabilities = computed(() => this.parent.calcResult()?.woundProbabilities || []);
   
-  stats = computed(() => {
-    const res = this.parent.calcResult();
-    if (!res) return null;
-    return {
-      avgValue: res.woundAvgValue || 0,
-      range80: res.woundRange80 || '0 - 0',
-      rangeTop5: res.woundRangeTop5 || '0 - 0',
-      probAtLeastAvg: res.woundProbAtLeastAvg || 0
-    };
-  });
+  stats = computed(() => this.parent.calcResult());
 
   displayTitle = computed(() => {
     const selected = this.parent.editingUnit();

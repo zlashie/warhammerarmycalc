@@ -18,8 +18,11 @@ interface ChartBar {
 })
 export class ProbDistCardComponent {
   protected readonly Math = Math;
+  
+  // Inputs
   data = input<number[]>([]);
   stats = input<any | null>(null);
+  typeLabel = input<string>('Hits'); // 'Hits' or 'Wounds'
 
   private readonly CONFIG = {
     THRESHOLD: 0.0001,
@@ -46,36 +49,61 @@ export class ProbDistCardComponent {
   });
 
   /**
-   * Data: displayed data
+   * Data: displayed data with dynamic labels and fixed NaN probability
    */
   displayStats = computed(() => {
     const s = this.stats();
-    if (!s) return [];
+    const rawData = this.data();
+    if (!s || !rawData || rawData.length === 0) return [];
+
+    const isWound = this.typeLabel() === 'Wounds';
+
+    const avgVal = isWound 
+      ? (s.woundAvgValue ?? s.avgValue ?? 0) 
+      : (s.avgValue ?? 0);
+    
+    const probAtLeastAvg = isWound 
+      ? (s.woundProbAtLeastAvg ?? s.probAtLeastAvg ?? 0) 
+      : (s.probAtLeastAvg ?? 0);
+
+    const range80 = isWound 
+      ? (s.woundRange80 ?? s.range80 ?? '0 - 0') 
+      : (s.range80 ?? '0 - 0');
+
+    const rangeTop5 = isWound 
+      ? (s.woundRangeTop5 ?? s.rangeTop5 ?? '0 - 0') 
+      : (s.rangeTop5 ?? '0 - 0');
+
+    const roundedAvgIndex = Math.round(avgVal);
+    const safeIndex = Math.min(roundedAvgIndex, rawData.length - 1);
+    const probAtAvg = rawData[safeIndex] 
+      ? Math.round(rawData[safeIndex] * 100) 
+      : 0;
 
     return [
       {
-        value: Math.round(s.avgValue),
-        label: 'Avg Hits',
-        sub: `${Math.round(s.avgProb)}% Probability`,
+        value: Math.round(avgVal),
+        label: `Avg ${this.typeLabel()}`,
+        sub: `${probAtAvg}% Probability`,
         cssClass: ''
       },
       {
-        value: `${Math.round(s.probAtLeastAvg)}%`,
+        value: `${Math.round(probAtLeastAvg)}%`,
         label: 'Prob ≥ Avg',
         sub: 'Success',
         cssClass: ''
       },
       {
-        value: s.range80,
+        value: range80,
         label: '80% Range',
         sub: 'Reliable',
-        cssClass: s.range80?.length > 3 ? 'long-value' : ''
+        cssClass: range80.length > 3 ? 'long-value' : ''
       },
       {
-        value: s.rangeTop5,
+        value: rangeTop5,
         label: 'Top 5%',
         sub: 'Lucky Roll',
-        cssClass: s.rangeTop5?.length > 3 ? 'long-value' : ''
+        cssClass: rangeTop5.length > 3 ? 'long-value' : ''
       }
     ];
   });
