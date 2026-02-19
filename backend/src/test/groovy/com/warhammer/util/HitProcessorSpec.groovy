@@ -158,15 +158,31 @@ class HitProcessorSpec extends Specification {
         }
 
     def "Reroll FAIL with Sustained Hits should provide standard efficiency boost"() {
-    given: "1 attack, BS 4+, Sustained 1, Reroll FAIL"
-    def request = new CalculationRequestDTO(
-        numberOfModels: 1, attacksPerModel: 1, bsValue: 4,
-        sustainedHits: true, sustainedValue: "1", rerollType: "FAIL"
-    )
-    when:
-    double[] dist = HitProcessor.calculateUnitDistribution(request)
-    double avg = dist.indices.collect { it * dist[it] }.sum()
-    then:
-    Math.abs(avg - 1.0) < 0.000001
+        given: "1 attack, BS 4+, Sustained 1, Reroll FAIL"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 4,
+            sustainedHits: true, sustainedValue: "1", rerollType: "FAIL"
+        )
+        when:
+        double[] dist = HitProcessor.calculateUnitDistribution(request)
+        double avg = dist.indices.collect { it * dist[it] }.sum()
+        then:
+        Math.abs(avg - 1.0) < 0.000001
+    }
+
+    def "Crit Hit modifier should trigger Sustained Hits on 5s if set to 5+"() {
+        given: "BS 4+, Sustained 1, Crit Hit on 5+"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 4,
+            sustainedHits: true, sustainedValue: "1", critHitValue: 5
+        )
+
+        when:
+        double[] dist = HitProcessor.calculateUnitDistribution(request)
+
+        then: "Faces 5 and 6 (2/6 prob) should be in index 2 (2 hits)"
+        Math.abs(dist[2] - 0.333333) < 0.0001
+        and: "Face 4 (1/6 prob) should be in index 1 (1 hit)"
+        Math.abs(dist[1] - 0.166666) < 0.0001
     }
 }

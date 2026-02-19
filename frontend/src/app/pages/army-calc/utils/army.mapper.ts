@@ -11,7 +11,8 @@ export class ArmyMapper {
         bsValue: parseInt(unit.stats.bsWs?.replace('+', '')) || 0,
         sustainedHits: !!sActive,
         sustainedValue: typeof sActive === 'string' ? sActive : (sActive ? "1" : "0"),
-        rerollType: typeof rerollValue === 'string' ? rerollValue : "NONE"
+        rerollType: typeof rerollValue === 'string' ? rerollValue : "NONE",
+        critHitValue: unit.toggles.crit || 6
       };
     });
   }

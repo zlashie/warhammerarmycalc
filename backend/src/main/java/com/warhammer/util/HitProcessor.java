@@ -69,13 +69,12 @@ public class HitProcessor {
             case "ONES" -> face == 1;
             case "FAIL" -> face < bs || face == 1; 
             case "ALL" -> {
-                // If Sustained Hits are active, we reroll even successful hits to hunt for 6s.
-                if (request.isSustainedHits()) {
-                    yield face < 6; 
-                } else {
-                    yield face < bs || face == 1;
-                }
-            }
+                            if (request.isSustainedHits()) {
+                                yield face < request.getCritHitValue(); 
+                            } else {
+                                yield face < bs || face == 1;
+                            }
+                          }
             default -> false;
         };
     }
@@ -89,17 +88,17 @@ public class HitProcessor {
      */
     private static void processFaceOutcome(int face, double[] dist, CalculationRequestDTO request, double probability) {
         if (face == 1) {
-            dist[0] += probability; // Natural 1s always fail.
-        } else if (face == 6) {
+            dist[0] += probability; 
+        } else if (face >= request.getCritHitValue()) { // Changed from (face == 6)
             if (request.isSustainedHits()) {
                 addSustainedToDist(dist, request.getSustainedValue(), probability);
             } else {
-                dist[1] += probability; // Standard Critical Hit.
+                dist[1] += probability; 
             }
         } else if (face >= request.getBsValue()) {
-            dist[1] += probability; // Standard Success.
+            dist[1] += probability; 
         } else {
-            dist[0] += probability; // Standard Fail.
+            dist[0] += probability; 
         }
     }
 

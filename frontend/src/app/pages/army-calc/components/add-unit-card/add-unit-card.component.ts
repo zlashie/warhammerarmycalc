@@ -39,7 +39,7 @@ export class AddUnitCardComponent {
       toggles: {
         lethal: false,        
         sustained: false,     
-        crit: false,          
+        crit: 6,          
         rerollHits: 'NONE',    
         rerollWounds: false, 
         antiX: false,         
@@ -77,5 +77,20 @@ export class AddUnitCardComponent {
     };
 
     this.currentUnit.toggles.rerollHits = mapping[friendly] || 'NONE';
+  }
+
+  getCritLabel(value: number): string | boolean {
+    if (value === 4) return '4+';
+    if (value === 5) return '5+';
+    return false; 
+  }
+
+  setCritFromFriendly(friendly: any) {
+    const mapping: any = {
+      '4+': 4,
+      '5+': 5
+    };
+    
+    this.currentUnit.toggles.crit = mapping[friendly] || 6;
   }
 }

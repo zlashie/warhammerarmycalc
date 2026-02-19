@@ -8,6 +8,7 @@ public class CalculationRequestDTO {
     private boolean sustainedHits;
     private String sustainedValue;
     private String rerollType;
+    private int critHitValue = 6;
 
     public CalculationRequestDTO() {}
 
@@ -31,4 +32,7 @@ public class CalculationRequestDTO {
 
     public String getRerollType() { return rerollType == null ? "NONE" : rerollType; }
     public void setRerollType(String rerollType) { this.rerollType = rerollType; }
+
+    public int getCritHitValue() { return critHitValue > 0 ? critHitValue : 6; }
+    public void setCritHitValue(int critHitValue) { this.critHitValue = critHitValue; }
 }

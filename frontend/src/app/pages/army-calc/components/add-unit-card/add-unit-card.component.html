@@ -45,10 +45,11 @@
       </app-toggle-orb>
 
       <app-toggle-orb 
-        abbreviation="C" 
-        label="Crit X+" 
-        [options]="['4+', '5+', '6+']" 
-        [(active)]="currentUnit.toggles.crit">
+        label="Crit (Hit)" 
+        abbreviation="CH"
+        [options]="['4+', '5+']"
+        [active]="getCritLabel(currentUnit.toggles.crit)"
+        (activeChange)="setCritFromFriendly($event)">
       </app-toggle-orb>
 
       <app-toggle-orb 
