@@ -52,6 +52,20 @@ public class DistributionAnalyzer {
         dto.setWoundRangeTop5(stats.rangeTop5);
     }
 
+    
+    /**
+     * Enriches the DTO with Damage-specific statistics.
+     */
+    public static void enrichDamage(CalculationResultDTO dto, double[] dist) {
+        AnalysisResult stats = performAnalysis(dist);
+
+        dto.setDamageAvgValue(stats.mean);
+        dto.setDamageProbAtLeastAvg(stats.probAtLeastAvg);
+        dto.setDamageRange80(stats.range80);
+        dto.setDamageRangeTop5(stats.rangeTop5);
+    }
+
+
     private static AnalysisResult performAnalysis(double[] dist) {
         if (dist == null || dist.length == 0) {
             return new AnalysisResult(0, 0, "0 - 0", "0 - 0", "0 - 0");

@@ -75,4 +75,31 @@ class CalculatorServiceSpec extends Specification {
         then: "Expected average is 10 * 0.58333 = 5.8333"
         Math.abs(result.avgValue - 5.8333) < 0.0001
     }
+
+    def "calculateArmyHits should process the full chain including D6 damage"() {
+        given: "A single model with 1 attack, hitting on 2+, wounding on 4+, with D6 damage"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, 
+            attacksPerModel: 1, 
+            bsValue: 2, 
+            damageValue: "D6"
+        )
+
+        when: "The service runs the calculation"
+        def result = service.calculateArmyHits([unit])
+
+        then: "The math should check out"
+        // Hit Average: 1 * 5/6 = 0.8333
+        Math.abs(result.avgValue - 0.8333) < 0.001
+        
+        // Wound Average: 0.8333 * 0.5 = 0.4166
+        Math.abs(result.woundAvgValue - 0.4166) < 0.001
+        
+        // Damage Average: 0.4166 * 3.5 (avg of D6) = 1.4583
+        Math.abs(result.damageAvgValue - 1.4583) < 0.001
+
+        and: "The damage statistical fields should be populated"
+        result.damageRange80 != null
+        result.damageProbabilities.size() > 1
+    }
 }

@@ -40,21 +40,28 @@ public class CalculatorService {
             totalHitDistribution = ProbabilityMath.convolve(totalHitDistribution, unitHitDistribution);
         }
 
-        // --- STAGE 2: WOUNDS (The "Happy Path") ---
+        // --- STAGE 2: WOUNDS ---
         // Transform the combined hit distribution into a wound distribution (4+ target)
         double[] totalWoundDistribution = WoundProcessor.calculateWoundDistribution(totalHitDistribution, 4);
 
-        // --- STAGE 3: PACKAGING & ANALYSIS ---
+        // --- STAGE 3: DAMAGE ---
+        String damageValue = requests.get(0).getDamageValue();
+        double[] totalDamageDistribution = DamageProcessor.calculateDamageDistribution(totalWoundDistribution, damageValue);
+        
+
+        // --- STAGE 4: PACKAGING & ANALYSIS ---
         // 1. Initialize DTO with Hit Probabilities
         CalculationResultDTO result = createBaseResult(totalHitDistribution);
         
         // 2. Add raw Wound Probabilities (rounded for the API)
         result.setWoundProbabilities(convertToRoundedList(totalWoundDistribution));
+        result.setDamageProbabilities(convertToRoundedList(totalDamageDistribution));
         
         // 3. Perform statistical analysis for BOTH phases
         // This fills avgValue, range80 (hits) AND woundAvgValue, woundRange80 (wounds)
         DistributionAnalyzer.enrichHits(result, totalHitDistribution);
         DistributionAnalyzer.enrichWounds(result, totalWoundDistribution);
+        DistributionAnalyzer.enrichDamage(result, totalDamageDistribution);
 
         return result;
     }

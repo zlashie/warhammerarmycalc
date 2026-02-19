@@ -13,12 +13,19 @@ public class CalculationResultDTO {
     private double probAtLeastAvg; 
     private String rangeTop5;
 
-    // --- NEW: Wound Fields ---
+    // --- Wound Fields ---
     private List<Double> woundProbabilities;
     private double woundAvgValue;
     private String woundRange80;
     private String woundRangeTop5;
     private double woundProbAtLeastAvg;
+
+    // --- Damage Fields ---
+    private List<Double> damageProbabilities;
+    private double damageAvgValue;
+    private String damageRange80;
+    private String damageRangeTop5;
+    private double damageProbAtLeastAvg;
 
     public CalculationResultDTO(List<Double> probabilities, int maxHits) {
         this.probabilities = probabilities;
@@ -43,7 +50,7 @@ public class CalculationResultDTO {
     public String getRangeTop5() { return rangeTop5; }
     public void setRangeTop5(String rangeTop5) { this.rangeTop5 = rangeTop5; }
 
-    // --- NEW: Wound Getters and Setters ---
+    // --- Wound Getters and Setters ---
     public List<Double> getWoundProbabilities() { return woundProbabilities; }
     public void setWoundProbabilities(List<Double> woundProbabilities) { this.woundProbabilities = woundProbabilities; }
     public double getWoundAvgValue() { return woundAvgValue; }
@@ -54,4 +61,16 @@ public class CalculationResultDTO {
     public void setWoundRangeTop5(String woundRangeTop5) { this.woundRangeTop5 = woundRangeTop5; }
     public double getWoundProbAtLeastAvg() { return woundProbAtLeastAvg; }
     public void setWoundProbAtLeastAvg(double woundProbAtLeastAvg) { this.woundProbAtLeastAvg = woundProbAtLeastAvg; }
+
+    // --- Damage Getters and Setters ---
+    public List<Double> getDamageProbabilities() { return damageProbabilities; } 
+    public void setDamageProbabilities(List<Double> damageProbabilities) { this.damageProbabilities = damageProbabilities; }
+    public double getDamageAvgValue() { return damageAvgValue; }
+    public void setDamageAvgValue(double damageAvgValue) { this.damageAvgValue = damageAvgValue; }
+    public String getDamageRange80() { return damageRange80; }
+    public void setDamageRange80(String damageRange80) { this.damageRange80 = damageRange80; }
+    public String getDamageRangeTop5() { return damageRangeTop5; }
+    public void setDamageRangeTop5(String damageRangeTop5) { this.damageRangeTop5 = damageRangeTop5; }
+    public double getDamageProbAtLeastAvg() { return damageProbAtLeastAvg; }
+    public void setDamageProbAtLeastAvg(double damageProbAtLeastAvg) { this.damageProbAtLeastAvg = damageProbAtLeastAvg; }
 }
