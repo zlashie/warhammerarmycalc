@@ -52,10 +52,11 @@
       </app-toggle-orb>
 
       <app-toggle-orb 
-        abbreviation="RH" 
         label="Reroll Hits" 
-        [options]="['1s', 'Fail', 'All']" 
-        [(active)]="currentUnit.toggles.rerollHits">
+        abbreviation="RH"
+        [options]="['1s', 'Fail', 'Fish']"
+        [active]="getFriendlyRerollLabel(currentUnit.toggles.rerollHits)"
+        (activeChange)="setRerollFromFriendly($event)">
       </app-toggle-orb>
 
       <app-toggle-orb 

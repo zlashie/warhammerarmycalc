@@ -40,7 +40,7 @@ export class AddUnitCardComponent {
         lethal: false,        
         sustained: false,     
         crit: false,          
-        rerollHits: false,    
+        rerollHits: 'NONE',    
         rerollWounds: false, 
         antiX: false,         
         devastating: false    
@@ -58,5 +58,24 @@ export class AddUnitCardComponent {
 
     this.unitAdded.emit(unitData);
     this.currentUnit = this.getInitialUnitState();
+  }
+
+  getFriendlyRerollLabel(value: string): string {
+    const mapping: any = {
+      'ONES': '1s',
+      'FAIL': 'Fail',
+      'ALL': 'Fish'
+    };
+  return mapping[value] || false; 
+  } 
+
+  setRerollFromFriendly(friendly: any) {
+    const mapping: any = {
+      '1s': 'ONES',
+      'Fail': 'FAIL',
+      'Fish': 'ALL'
+    };
+
+    this.currentUnit.toggles.rerollHits = mapping[friendly] || 'NONE';
   }
 }
