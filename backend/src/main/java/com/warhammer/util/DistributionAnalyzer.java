@@ -29,7 +29,12 @@ public class DistributionAnalyzer {
         int absoluteMax = findAbsoluteMax(dist);
 
         dto.setAvgValue(round(mean));
-        dto.setAvgProb(round(dist[(int) Math.round(mean)] * 100));
+
+        int avgIndex = (int) Math.round(mean);
+        if (avgIndex < dist.length) {
+            dto.setAvgProb(round(dist[avgIndex] * 100));
+        }
+
         dto.setProbAtLeastAvg(round(calculateProbabilityAtLeast(dist, mean) * 100));
         
         dto.setRange80(formatRange(p10, p90));

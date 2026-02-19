@@ -116,4 +116,57 @@ class HitProcessorSpec extends Specification {
         dist.length == 1
         dist[0] == 1.0
     }
+
+    @Unroll
+    def "Reroll #rerollType with BS #bs should result in #expectedAvg expected hits"() {
+        given: "1 attack with specified reroll"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: bs,
+            rerollType: rerollType, sustainedHits: false
+        )
+
+        when:
+        double[] dist = HitProcessor.calculateUnitDistribution(request)
+        double avg = 0
+        dist.eachWithIndex { val, idx -> avg += val * idx }
+
+        then:
+        Math.abs(avg - expectedAvg) < 0.000001
+
+        where:
+        rerollType | bs || expectedAvg
+        "ONES"     | 4  || 0.58333333 // 0.5 (base) + (1/6 * 0.5)
+        "FAIL"     | 4  || 0.75       // 0.5 (base) + (0.5 * 0.5)
+        "ALL"      | 3  || 0.88888888 // 4/6 (base) + (2/6 * 4/6)
+        "NONE"     | 4  || 0.5
+    }
+
+    def "Reroll ALL with Sustained Hits, aka Fishing for Crits, should maximize explosions"() {
+            given: "1 attack, BS 4+, Sustained 1, Reroll ALL (Fishing for 6s)"
+            def request = new CalculationRequestDTO(
+                numberOfModels: 1, attacksPerModel: 1, bsValue: 4,
+                sustainedHits: true, sustainedValue: "1", rerollType: "ALL"
+            )
+
+            when:
+            double[] dist = HitProcessor.calculateUnitDistribution(request)
+            double avg = 0
+            dist.eachWithIndex { val, idx -> avg += val * idx }
+
+            then: "Expected Avg = (11/36 * 2) + (10/36 * 1) = 0.888888"
+            Math.abs(avg - 0.88888889) < 0.000001
+        }
+
+    def "Reroll FAIL with Sustained Hits should provide standard efficiency boost"() {
+    given: "1 attack, BS 4+, Sustained 1, Reroll FAIL"
+    def request = new CalculationRequestDTO(
+        numberOfModels: 1, attacksPerModel: 1, bsValue: 4,
+        sustainedHits: true, sustainedValue: "1", rerollType: "FAIL"
+    )
+    when:
+    double[] dist = HitProcessor.calculateUnitDistribution(request)
+    double avg = dist.indices.collect { it * dist[it] }.sum()
+    then:
+    Math.abs(avg - 1.0) < 0.000001
+    }
 }

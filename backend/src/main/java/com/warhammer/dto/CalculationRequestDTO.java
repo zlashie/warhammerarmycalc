@@ -7,6 +7,7 @@ public class CalculationRequestDTO {
     private int bsValue;
     private boolean sustainedHits;
     private String sustainedValue;
+    private String rerollType;
 
     public CalculationRequestDTO() {}
 
@@ -27,4 +28,7 @@ public class CalculationRequestDTO {
 
     public String getSustainedValue() { return sustainedValue; }
     public void setSustainedValue(String sustainedValue) { this.sustainedValue = sustainedValue; }
+
+    public String getRerollType() { return rerollType == null ? "NONE" : rerollType; }
+    public void setRerollType(String rerollType) { this.rerollType = rerollType; }
 }

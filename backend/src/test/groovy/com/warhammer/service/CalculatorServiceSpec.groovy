@@ -61,4 +61,18 @@ class CalculatorServiceSpec extends Specification {
         then: "It shouldn't crash and should treat it as 0 bonus hits (50% hit rate)"
         Math.abs(result.avgValue - 5.0) < 0.0001
     }
+
+    def "calculateArmyHits should correctly integrate reroll mechanics"() {
+        given: "A unit with 10 attacks, BS 4+, rerolling 1s"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 10, bsValue: 4, 
+            rerollType: "ONES", sustainedHits: false
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "Expected average is 10 * 0.58333 = 5.8333"
+        Math.abs(result.avgValue - 5.8333) < 0.0001
+    }
 }

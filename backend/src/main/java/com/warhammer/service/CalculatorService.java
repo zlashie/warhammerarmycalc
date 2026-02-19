@@ -29,6 +29,11 @@ public class CalculatorService {
      * @return Enriched DTO containing raw probabilities and statistical analysis.
      */
     public CalculationResultDTO calculateArmyHits(List<CalculationRequestDTO> requests) {
+
+        if (requests == null || requests.isEmpty()) {
+            return createBaseResult(INITIAL_PROBABILITY_STATE);
+        }
+
         // Start with a distribution representing 100% chance of 0 hits
         double[] totalArmyDistribution = INITIAL_PROBABILITY_STATE;
 
