@@ -35,7 +35,11 @@
     <hr class="card-divider">
 
     <div class="toggle-grid">
-      <app-toggle-orb abbreviation="L" label="Lethal" [(active)]="currentUnit.toggles.lethal"></app-toggle-orb>
+      <app-toggle-orb 
+        label="Lethal Hits" 
+        abbreviation="LH" 
+        [(active)]="currentUnit.toggles.lethal">
+      </app-toggle-orb>
 
       <app-toggle-orb 
         abbreviation="S" 

@@ -10,6 +10,7 @@ export class ArmyMapper {
         attacksPerModel: parseInt(unit.stats.attacks) || 0,
         bsValue: parseInt(unit.stats.bsWs?.replace('+', '')) || 0,
         damageValue: unit.stats.damage || "1",
+        lethalHits: !!unit.toggles.lethal,
         sustainedHits: !!sActive,
         sustainedValue: typeof sActive === 'string' ? sActive : (sActive ? "1" : "0"),
         rerollType: typeof rerollValue === 'string' ? rerollValue : "NONE",
