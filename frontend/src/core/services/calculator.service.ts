@@ -3,21 +3,27 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface CalcResult {
-  probabilities: number[]; 
-  maxHits: number;
+  // Hit Stats
   avgValue: number;
   avgProb: number;
+  probabilities: number[];
   range80: string;
-  rangeStd: string;
-  maxProbValue: number;
-  maxProbPercent: number;
-  probAtLeastAvg: number;
   rangeTop5: string;
-  woundProbabilities: number[];
-  woundAvgValue: number;
-  woundRange80: string;
-  woundRangeTop5: string;
-  woundProbAtLeastAvg: number;
+  probAtLeastAvg: number;
+
+  // Wound Stats
+  woundAvgValue?: number;
+  woundProbabilities?: number[];
+  woundRange80?: string;
+  woundRangeTop5?: string;
+  woundProbAtLeastAvg?: number;
+
+  // Damage Stats (New)
+  damageAvgValue?: number;
+  damageProbabilities?: number[];
+  damageRange80?: string;
+  damageRangeTop5?: string;
+  damageProbAtLeastAvg?: number;
 }
 
 @Injectable({

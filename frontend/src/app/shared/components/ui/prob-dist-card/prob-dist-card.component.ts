@@ -57,22 +57,31 @@ export class ProbDistCardComponent {
     if (!s || !rawData || rawData.length === 0) return [];
 
     const isWound = this.typeLabel() === 'Wounds';
+    const isDamage = this.typeLabel() === 'Damage'; // Add this
 
-    const avgVal = isWound 
-      ? (s.woundAvgValue ?? s.avgValue ?? 0) 
-      : (s.avgValue ?? 0);
-    
-    const probAtLeastAvg = isWound 
-      ? (s.woundProbAtLeastAvg ?? s.probAtLeastAvg ?? 0) 
-      : (s.probAtLeastAvg ?? 0);
+    const avgVal = isDamage 
+        ? (s.damageAvgValue ?? 0)
+        : isWound 
+        ? (s.woundAvgValue ?? s.avgValue ?? 0) 
+        : (s.avgValue ?? 0);
 
-    const range80 = isWound 
-      ? (s.woundRange80 ?? s.range80 ?? '0 - 0') 
-      : (s.range80 ?? '0 - 0');
+    const probAtLeastAvg = isDamage
+        ? (s.damageProbAtLeastAvg ?? 0)
+        : isWound 
+        ? (s.woundProbAtLeastAvg ?? s.probAtLeastAvg ?? 0) 
+        : (s.probAtLeastAvg ?? 0);
 
-    const rangeTop5 = isWound 
-      ? (s.woundRangeTop5 ?? s.rangeTop5 ?? '0 - 0') 
-      : (s.rangeTop5 ?? '0 - 0');
+    const range80 = isDamage
+        ? (s.damageRange80 ?? '0 - 0')
+        : isWound 
+        ? (s.woundRange80 ?? s.range80 ?? '0 - 0') 
+        : (s.range80 ?? '0 - 0');
+
+    const rangeTop5 = isDamage
+        ? (s.damageRangeTop5 ?? '0 - 0')
+        : isWound 
+        ? (s.woundRangeTop5 ?? s.rangeTop5 ?? '0 - 0') 
+        : (s.rangeTop5 ?? '0 - 0');
 
     const roundedAvgIndex = Math.round(avgVal);
     const safeIndex = Math.min(roundedAvgIndex, rawData.length - 1);
