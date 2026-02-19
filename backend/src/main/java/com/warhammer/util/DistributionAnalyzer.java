@@ -3,8 +3,8 @@ package com.warhammer.util;
 import com.warhammer.dto.CalculationResultDTO;
 
 /**
- * Responsible for transforming a raw probability distribution array 
- * into human-readable statistical insights.
+ * Responsible for transforming raw probability distribution arrays 
+ * into human-readable statistical insights for both Hits and Wounds.
  */
 public class DistributionAnalyzer {
 
@@ -15,10 +15,47 @@ public class DistributionAnalyzer {
     private static final double ROUNDING_FACTOR = 10000.0;
 
     /**
-     * Orchestrates the enrichment of the DTO with all calculated statistics.
+     * Legacy entry point to maintain compatibility with existing tests.
+     * Defaults to Hit enrichment.
      */
     public static void enrich(CalculationResultDTO dto, double[] dist) {
-        if (dist == null || dist.length == 0) return;
+        enrichHits(dto, dist);
+    }
+
+    /**
+     * Enriches the DTO with Hit-specific statistics.
+     */
+    public static void enrichHits(CalculationResultDTO dto, double[] dist) {
+        AnalysisResult stats = performAnalysis(dist);
+        
+        dto.setAvgValue(stats.mean);
+        dto.setProbAtLeastAvg(stats.probAtLeastAvg);
+        dto.setRange80(stats.range80);
+        dto.setRangeTop5(stats.rangeTop5);
+        dto.setRangeStd(stats.rangeStd);
+
+        int avgIndex = (int) Math.round(stats.mean);
+        if (avgIndex < dist.length) {
+            dto.setAvgProb(round(dist[avgIndex] * 100));
+        }
+    }
+
+    /**
+     * Enriches the DTO with Wound-specific statistics.
+     */
+    public static void enrichWounds(CalculationResultDTO dto, double[] dist) {
+        AnalysisResult stats = performAnalysis(dist);
+        
+        dto.setWoundAvgValue(stats.mean);
+        dto.setWoundProbAtLeastAvg(stats.probAtLeastAvg);
+        dto.setWoundRange80(stats.range80);
+        dto.setWoundRangeTop5(stats.rangeTop5);
+    }
+
+    private static AnalysisResult performAnalysis(double[] dist) {
+        if (dist == null || dist.length == 0) {
+            return new AnalysisResult(0, 0, "0 - 0", "0 - 0", "0 - 0");
+        }
 
         double mean = calculateMean(dist);
         double stdDev = calculateStandardDeviation(dist, mean);
@@ -28,28 +65,26 @@ public class DistributionAnalyzer {
         int p95 = findPercentile(dist, P95_THRESHOLD);
         int absoluteMax = findAbsoluteMax(dist);
 
-        dto.setAvgValue(round(mean));
-
-        int avgIndex = (int) Math.round(mean);
-        if (avgIndex < dist.length) {
-            dto.setAvgProb(round(dist[avgIndex] * 100));
-        }
-
-        dto.setProbAtLeastAvg(round(calculateProbabilityAtLeast(dist, mean) * 100));
-        
-        dto.setRange80(formatRange(p10, p90));
-        dto.setRangeTop5(formatRange(p95, absoluteMax));
-        dto.setRangeStd(formatStandardRange(mean, stdDev));
+        return new AnalysisResult(
+            round(mean),
+            round(calculateProbabilityAtLeast(dist, mean) * 100),
+            formatRange(p10, p90),
+            formatRange(p95, absoluteMax),
+            formatStandardRange(mean, stdDev)
+        );
     }
 
-    /**
-     * Calculates the Expected Value (Weighted Average) of the distribution.
-     */
+    private static record AnalysisResult(
+        double mean, 
+        double probAtLeastAvg, 
+        String range80, 
+        String rangeTop5, 
+        String rangeStd
+    ) {}
+
     private static double calculateMean(double[] dist) {
         double mean = 0;
-        for (int i = 0; i < dist.length; i++) {
-            mean += i * dist[i];
-        }
+        for (int i = 0; i < dist.length; i++) mean += i * dist[i];
         return mean;
     }
 
@@ -58,9 +93,7 @@ public class DistributionAnalyzer {
      */
     private static double calculateStandardDeviation(double[] dist, double mean) {
         double variance = 0;
-        for (int i = 0; i < dist.length; i++) {
-            variance += dist[i] * Math.pow(i - mean, 2);
-        }
+        for (int i = 0; i < dist.length; i++) variance += dist[i] * Math.pow(i - mean, 2);
         return Math.sqrt(variance);
     }
 

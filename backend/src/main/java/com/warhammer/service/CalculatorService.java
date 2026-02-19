@@ -2,9 +2,7 @@ package com.warhammer.service;
 
 import com.warhammer.dto.CalculationRequestDTO;
 import com.warhammer.dto.CalculationResultDTO;
-import com.warhammer.util.ProbabilityMath;
-import com.warhammer.util.DistributionAnalyzer;
-import com.warhammer.util.HitProcessor;
+import com.warhammer.util.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -14,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * High-level orchestrator for army-wide probability calculations.
  * This service coordinates the calculation pipeline: 
- * Rule Processing -> Mathematical Convolution -> Statistical Analysis.
+ * Rule Processing -> Hit Convolution -> Wound Transformation -> Statistical Analysis.
  */
 @Service
 public class CalculatorService {
@@ -23,10 +21,9 @@ public class CalculatorService {
     private static final double[] INITIAL_PROBABILITY_STATE = {1.0};
 
     /**
-     * Calculates the aggregate hit distribution for an entire list of units.
-     * Iteratively processes each unit and merges their distributions.
+     * Calculates aggregate hit and wound distributions for an entire list of units.
      * @param requests List of unit attack profiles and modifiers.
-     * @return Enriched DTO containing raw probabilities and statistical analysis.
+     * @return Enriched DTO containing raw probabilities and statistical analysis for both phases.
      */
     public CalculationResultDTO calculateArmyHits(List<CalculationRequestDTO> requests) {
 
@@ -34,22 +31,30 @@ public class CalculatorService {
             return createBaseResult(INITIAL_PROBABILITY_STATE);
         }
 
-        // Start with a distribution representing 100% chance of 0 hits
-        double[] totalArmyDistribution = INITIAL_PROBABILITY_STATE;
+        // --- STAGE 1: HITS ---
+        // Convolve all units into a single combined army hit distribution
+        double[] totalHitDistribution = INITIAL_PROBABILITY_STATE;
 
         for (CalculationRequestDTO request : requests) {
-            // 1. Process rules for the individual unit
-            double[] unitDistribution = HitProcessor.calculateUnitDistribution(request);
-            
-            // 2. Mathematically merge the unit into the total army distribution
-            totalArmyDistribution = ProbabilityMath.convolve(totalArmyDistribution, unitDistribution);
+            double[] unitHitDistribution = HitProcessor.calculateUnitDistribution(request);
+            totalHitDistribution = ProbabilityMath.convolve(totalHitDistribution, unitHitDistribution);
         }
 
-        // 3. Prepare the response container
-        CalculationResultDTO result = createBaseResult(totalArmyDistribution);
+        // --- STAGE 2: WOUNDS (The "Happy Path") ---
+        // Transform the combined hit distribution into a wound distribution (4+ target)
+        double[] totalWoundDistribution = WoundProcessor.calculateWoundDistribution(totalHitDistribution, 4);
+
+        // --- STAGE 3: PACKAGING & ANALYSIS ---
+        // 1. Initialize DTO with Hit Probabilities
+        CalculationResultDTO result = createBaseResult(totalHitDistribution);
         
-        // 4. Perform statistical analysis (Mean, StdDev, Ranges) on the final result
-        DistributionAnalyzer.enrich(result, totalArmyDistribution);
+        // 2. Add raw Wound Probabilities (rounded for the API)
+        result.setWoundProbabilities(convertToRoundedList(totalWoundDistribution));
+        
+        // 3. Perform statistical analysis for BOTH phases
+        // This fills avgValue, range80 (hits) AND woundAvgValue, woundRange80 (wounds)
+        DistributionAnalyzer.enrichHits(result, totalHitDistribution);
+        DistributionAnalyzer.enrichWounds(result, totalWoundDistribution);
 
         return result;
     }
@@ -59,15 +64,20 @@ public class CalculatorService {
      * rounded List for the API response.
      */
     private CalculationResultDTO createBaseResult(double[] distribution) {
-        List<Double> roundedProbabilities = Arrays.stream(distribution)
-                .map(this::round)
-                .boxed()
-                .collect(Collectors.toList());
-
-        // Max hits is always the length of the distribution minus the zero-index
+        List<Double> roundedProbabilities = convertToRoundedList(distribution);
         int maxPossibleHits = distribution.length - 1;
         
         return new CalculationResultDTO(roundedProbabilities, maxPossibleHits);
+    }
+
+    /**
+     * Helper to convert double arrays to rounded Lists for DTO consistency.
+     */
+    private List<Double> convertToRoundedList(double[] distribution) {
+        return Arrays.stream(distribution)
+                .map(this::round)
+                .boxed()
+                .collect(Collectors.toList());
     }
 
     /**
