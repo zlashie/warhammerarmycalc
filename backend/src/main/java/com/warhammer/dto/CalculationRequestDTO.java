@@ -5,6 +5,8 @@ public class CalculationRequestDTO {
     private int numberOfModels;
     private int attacksPerModel;
     private int bsValue;
+    private boolean sustainedHits;
+    private String sustainedValue;
 
     public CalculationRequestDTO() {}
 
@@ -19,4 +21,10 @@ public class CalculationRequestDTO {
 
     public int getBsValue() { return bsValue; }
     public void setBsValue(int bsValue) { this.bsValue = bsValue; }
+
+    public boolean isSustainedHits() { return sustainedHits; }
+    public void setSustainedHits(boolean sustainedHits) { this.sustainedHits = sustainedHits; }
+
+    public String getSustainedValue() { return sustainedValue; }
+    public void setSustainedValue(String sustainedValue) { this.sustainedValue = sustainedValue; }
 }

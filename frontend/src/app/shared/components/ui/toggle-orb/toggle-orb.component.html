@@ -8,7 +8,11 @@
     <div class="selection-popup">
       <div class="options-wrapper">
         @for (opt of options; track opt) {
-          <button type="button" class="sub-orb" (click)="selectOption(opt)">
+          <button 
+            type="button" 
+            class="sub-orb" 
+            [class.selected]="active === opt" 
+            (click)="selectOption(opt)">
             {{ opt }}
           </button>
         }

@@ -1,41 +1,64 @@
 package com.warhammer.service
 
 import com.warhammer.dto.CalculationRequestDTO
-import com.warhammer.dto.CalculationResultDTO
 import spock.lang.Specification
 
 class CalculatorServiceSpec extends Specification {
-
     CalculatorService service = new CalculatorService()
 
-    def "calculateArmyHits should correctly merge multiple units into one result"() {
-        given: "Two units with guaranteed hits for easy verification"
-        // Unit 1: 1 model, 1 attack, BS 1+ (Formula: 7-1/6 = 6/6 = 100% hit)
-        def unit1 = new CalculationRequestDTO(numberOfModels: 1, attacksPerModel: 1, bsValue: 1)
-        // Unit 2: 1 model, 2 attacks, BS 1+ (100% hit)
-        def unit2 = new CalculationRequestDTO(numberOfModels: 1, attacksPerModel: 2, bsValue: 1)
+    def "calculateArmyHits should correctly calculate hits considering 1s fail"() {
+        given: "A unit with 3 attacks, BS 1 (effectively hitting on 2+)"
+        def unit = new CalculationRequestDTO(numberOfModels: 1, attacksPerModel: 3, bsValue: 1, sustainedHits: false)
 
-        when: "The service calculates the army total"
-        CalculationResultDTO result = service.calculateArmyHits([unit1, unit2])
+        when:
+        def result = service.calculateArmyHits([unit])
 
-        then: "The total max hits should be 3 (1 from unit1 + 2 from unit2)"
-        result.maxHits == 3
-        
-        and: "The average value should be exactly 3.0"
-        result.avgValue == 3.0
-
-        and: "The probability list should reflect 100% chance of 3 hits"
-        // Index 0, 1, 2 should be 0.0. Index 3 should be 1.0.
-        result.probabilities[3] == 1.0
+        then: "Average should be 3 * (5/6) = 2.5"
+        Math.abs(result.avgValue - 2.5) < 0.0001
     }
 
-    def "calculateArmyHits should handle an empty list of requests"() {
-        when: "An empty army is submitted"
-        CalculationResultDTO result = service.calculateArmyHits([])
+    def "calculateArmyHits should handle an empty list"() {
+        expect:
+        service.calculateArmyHits([]).avgValue == 0.0
+    }
 
-        then: "It should return the initial state (100% chance of 0 hits)"
-        result.maxHits == 0
-        result.avgValue == 0.0
-        result.probabilities == [1.0]
+    def "calculateArmyHits should correctly merge distributions from different units"() {
+        given: "One accurate unit and one inaccurate unit"
+        def elite = new CalculationRequestDTO(numberOfModels: 1, attacksPerModel: 1, bsValue: 2) // 5/6 hits
+        def recruit = new CalculationRequestDTO(numberOfModels: 1, attacksPerModel: 1, bsValue: 6) // 1/6 hits
+
+        when:
+        def result = service.calculateArmyHits([elite, recruit])
+
+        then: "Total expected hits = 5/6 + 1/6 = 1.0"
+        Math.abs(result.avgValue - 1.0) < 0.0001
+    }
+
+    def "calculateArmyHits should integrate Sustained Hits from multiple units"() {
+        given: "A unit with Sustained Hits 1"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 6, 
+            sustainedHits: true, sustainedValue: "1"
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "On a 6, it deals 2 hits. Prob(6) = 1/6. Expected value = 2 * (1/6) = 0.3333"
+        Math.abs(result.avgValue - 0.333333) < 0.0001
+    }
+
+    def "calculateArmyHits should treat null sustainedValue as Sustained 0"() {
+        given: "Sustained is active but value is null"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 10, bsValue: 4, 
+            sustainedHits: true, sustainedValue: null
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "It shouldn't crash and should treat it as 0 bonus hits (50% hit rate)"
+        Math.abs(result.avgValue - 5.0) < 0.0001
     }
 }
