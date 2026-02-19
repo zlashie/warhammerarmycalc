@@ -10,6 +10,7 @@ public class CalculationRequestDTO {
     private String rerollType;
     private int critHitValue = 6;
     private String damageValue;
+    private boolean lethalHits;
 
     public CalculationRequestDTO() {}
 
@@ -39,4 +40,7 @@ public class CalculationRequestDTO {
 
     public String getDamageValue() { return (damageValue == null || damageValue.isBlank()) ? "1" : damageValue; }
     public void setDamageValue(String damageValue) { this.damageValue = damageValue; }
+
+    public boolean isLethalHits() { return lethalHits; }
+    public void setLethalHits(boolean lethalHits) { this.lethalHits = lethalHits; }
 }

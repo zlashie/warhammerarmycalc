@@ -8,7 +8,13 @@ class CalculatorServiceSpec extends Specification {
 
     def "calculateArmyHits should correctly calculate hits considering 1s fail"() {
         given: "A unit with 3 attacks, BS 1 (effectively hitting on 2+)"
-        def unit = new CalculationRequestDTO(numberOfModels: 1, attacksPerModel: 3, bsValue: 1, sustainedHits: false)
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, 
+            attacksPerModel: 3, 
+            bsValue: 1, 
+            sustainedHits: false, 
+            lethalHits: false
+        )
 
         when:
         def result = service.calculateArmyHits([unit])
@@ -24,8 +30,8 @@ class CalculatorServiceSpec extends Specification {
 
     def "calculateArmyHits should correctly merge distributions from different units"() {
         given: "One accurate unit and one inaccurate unit"
-        def elite = new CalculationRequestDTO(numberOfModels: 1, attacksPerModel: 1, bsValue: 2) // 5/6 hits
-        def recruit = new CalculationRequestDTO(numberOfModels: 1, attacksPerModel: 1, bsValue: 6) // 1/6 hits
+        def elite = new CalculationRequestDTO(numberOfModels: 1, attacksPerModel: 1, bsValue: 2) 
+        def recruit = new CalculationRequestDTO(numberOfModels: 1, attacksPerModel: 1, bsValue: 6) 
 
         when:
         def result = service.calculateArmyHits([elite, recruit])
@@ -44,7 +50,7 @@ class CalculatorServiceSpec extends Specification {
         when:
         def result = service.calculateArmyHits([unit])
 
-        then: "On a 6, it deals 2 hits. Prob(6) = 1/6. Expected value = 2 * (1/6) = 0.3333"
+        then: "On a 6 (1/6 prob), it deals 2 hits (1 base + 1 bonus). EV = 2 * (1/6) = 0.3333"
         Math.abs(result.avgValue - 0.333333) < 0.0001
     }
 
@@ -58,7 +64,7 @@ class CalculatorServiceSpec extends Specification {
         when:
         def result = service.calculateArmyHits([unit])
 
-        then: "It shouldn't crash and should treat it as 0 bonus hits (50% hit rate)"
+        then: "It treats null as 0 bonus hits (50% hit rate for 10 attacks)"
         Math.abs(result.avgValue - 5.0) < 0.0001
     }
 
@@ -72,7 +78,7 @@ class CalculatorServiceSpec extends Specification {
         when:
         def result = service.calculateArmyHits([unit])
 
-        then: "Expected average is 10 * 0.58333 = 5.8333"
+        then: "Expected average is 10 * (0.5 + (1/6 * 0.5)) = 5.8333"
         Math.abs(result.avgValue - 5.8333) < 0.0001
     }
 
@@ -85,21 +91,79 @@ class CalculatorServiceSpec extends Specification {
             damageValue: "D6"
         )
 
-        when: "The service runs the calculation"
+        when:
         def result = service.calculateArmyHits([unit])
 
-        then: "The math should check out"
-        // Hit Average: 1 * 5/6 = 0.8333
+        then: "The math for the full chain should be correct"
         Math.abs(result.avgValue - 0.8333) < 0.001
-        
-        // Wound Average: 0.8333 * 0.5 = 0.4166
         Math.abs(result.woundAvgValue - 0.4166) < 0.001
-        
-        // Damage Average: 0.4166 * 3.5 (avg of D6) = 1.4583
         Math.abs(result.damageAvgValue - 1.4583) < 0.001
 
         and: "The damage statistical fields should be populated"
         result.damageRange80 != null
         result.damageProbabilities.size() > 1
+    }
+
+    def "calculateArmyHits should correctly bypass wound roll for Lethal Hits"() {
+        given: "A single attack with Lethal Hits that hits on 6+"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 6, 
+            lethalHits: true, sustainedHits: false
+        )
+
+        when: "Calculating the army distribution"
+        def result = service.calculateArmyHits([unit])
+
+        then: "The average wounds should be exactly the hit probability (1/6)"
+        Math.abs(result.woundAvgValue - 0.166666) < 0.0001
+        
+        and: "If it were NOT lethal, EV would be 1/6 (hit) * 1/2 (wound) = 0.0833"
+        result.woundAvgValue > 0.0833 
+    }
+
+    def "calculateArmyHits should handle the Lethal + Sustained interaction pipeline"() {
+        given: "1 attack, Lethal and Sustained 1, hitting on 6+"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 6, 
+            lethalHits: true, sustainedHits: true, sustainedValue: "1"
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "Math: (1/6 lethal) + (1/6 hit * 1/2 wound chance) = 0.25"
+        Math.abs(result.woundAvgValue - 0.25) < 0.0001
+    }
+
+    def "Army convolution should merge units with and without Lethal Hits"() {
+        given: "Unit A (Lethal) and Unit B (Standard)"
+        def lethalUnit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 6, lethalHits: true 
+        ) 
+        
+        def standardUnit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 6, lethalHits: false
+        ) 
+
+        when:
+        def result = service.calculateArmyHits([lethalUnit, standardUnit])
+
+        then: "Total wounds should be the sum of both (0.1666 + 0.0833 = 0.25)"
+        Math.abs(result.woundAvgValue - 0.25) < 0.0001
+    }
+
+    def "calculateArmyHits should correctly apply damage to the combined wound pool"() {
+        given: "A unit where ALL hits are critical (and thus lethal)"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 2, 
+            lethalHits: true, critHitValue: 2, 
+            damageValue: "3"
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "5/6 hits are lethal -> 0.8333 wounds * 3 damage = 2.5"
+        Math.abs(result.damageAvgValue - 2.5) < 0.001 
     }
 }
