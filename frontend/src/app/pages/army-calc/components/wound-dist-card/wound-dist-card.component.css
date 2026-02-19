@@ -1,0 +1,14 @@
+:host {
+    display: block;
+    width: 100%;
+    min-width: 0; 
+}
+
+.dist-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main, #333);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+}

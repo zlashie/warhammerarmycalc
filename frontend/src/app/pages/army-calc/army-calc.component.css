@@ -13,7 +13,7 @@
     align-items: start;
 }
 
-.units-column {
+.units-column, .results-column {
     display: flex;
     flex-direction: column;
     gap: 20px;

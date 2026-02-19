@@ -13,6 +13,11 @@ export interface CalcResult {
   maxProbPercent: number;
   probAtLeastAvg: number;
   rangeTop5: string;
+  woundProbabilities: number[];
+  woundAvgValue: number;
+  woundRange80: string;
+  woundRangeTop5: string;
+  woundProbAtLeastAvg: number;
 }
 
 @Injectable({

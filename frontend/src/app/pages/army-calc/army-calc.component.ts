@@ -4,6 +4,7 @@ import { CalculatorService, CalcResult } from '../../../core/services/calculator
 import { AddUnitCardComponent } from './components/add-unit-card/add-unit-card.component';
 import { LedgerCardComponent } from './components/ledger-card/ledger-card.component';
 import { HitDistCardComponent } from './components/hit-dist-card/hit-dist-card.component';
+import { WoundDistCardComponent } from './components/wound-dist-card/wound-dist-card.component';
 import { ArmyStoreService } from './services/army-store.service'; 
 import { ArmyMapper } from './utils/army.mapper';                
 
@@ -14,7 +15,8 @@ import { ArmyMapper } from './utils/army.mapper';
     CommonModule,  
     AddUnitCardComponent, 
     LedgerCardComponent, 
-    HitDistCardComponent
+    HitDistCardComponent,
+    WoundDistCardComponent
   ],
   templateUrl: './army-calc.component.html',
   styleUrls: ['./army-calc.component.css']
