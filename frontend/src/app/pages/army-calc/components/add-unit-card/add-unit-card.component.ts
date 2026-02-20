@@ -42,7 +42,7 @@ export class AddUnitCardComponent {
         crit: 6,          
         rerollHits: 'NONE',    
         rerollWounds: 'NONE', 
-        antiX: false,         
+        antiX: 6,         
         devastating: false    
       }
     };
@@ -97,7 +97,8 @@ export class AddUnitCardComponent {
   getFriendlyWoundRerollLabel(value: string): string {
     const mapping: any = {
       'ONES': '1s',
-      'FAIL': 'Fail'
+      'FAIL': 'Fail',
+      'ALL': 'Fish'
     }
     return mapping[value] || false; 
   }
@@ -105,8 +106,14 @@ export class AddUnitCardComponent {
   setWoundRerollFromFriendly(friendly: any) {
     const mapping: any = {
       '1s': 'ONES',
-      'Fail': 'FAIL'
+      'Fail': 'FAIL',
+      'Fish': 'ALL'
     }
     this.currentUnit.toggles.rerollWounds = mapping[friendly] || 'NONE';
+  }
+
+  setAntiXFromFriendly(friendly: any) {
+    const val = parseInt(friendly.replace('+', ''));
+    this.currentUnit.toggles.antiX = val;
   }
 }

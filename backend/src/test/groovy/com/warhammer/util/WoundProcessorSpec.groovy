@@ -134,4 +134,63 @@ class WoundProcessorSpec extends Specification {
         woundDist.eachWithIndex { prob, i -> actualAvg += (i * prob) }
         Math.abs(actualAvg - 5.0) < 0.0001
     }
+
+    @Unroll
+    def "Anti-X: #desc (Target #target+, Anti-#critValue+) should avg #expectedAvg wounds for 6 hits"() {
+        given: "6 guaranteed hits"
+        double[] hitDist = new double[7]
+        hitDist[6] = 1.0
+        
+        def request = new CalculationRequestDTO(
+            woundRerollType: "NONE",
+            critWoundValue: critValue
+        )
+
+        when:
+        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, target, request)
+        double actualAvg = 0
+        woundDist.eachWithIndex { prob, i -> actualAvg += (i * prob) }
+
+        then: "The average reflects that Anti-X provides a better success floor than the target roll"
+        Math.abs(actualAvg - expectedAvg) < 0.001
+
+        where:
+        desc                      | target | critValue | expectedAvg
+        "Standard (No Anti-X)"    | 4      | 6         | 3.0       
+        "Anti-4+ vs High Tough"   | 6      | 4         | 3.0          
+        "Anti-2+ vs High Tough"   | 5      | 2         | 5.0          
+        "Crit overlaps target"    | 3      | 5         | 4.0        
+    }
+
+    def "Devastating Wounds with Reroll ALL, aka fishing, with Anti-4+"() {
+        given: "6 guaranteed hits on a target that usually needs 6s to wound"
+        double[] hitDist = new double[7]
+        hitDist[6] = 1.0
+
+        def request = new CalculationRequestDTO(
+            woundRerollType: "ALL", 
+            devastatingWounds: true,
+            critWoundValue: 4    
+        )
+
+        when: "Calculating wounds against a 6+ target"
+        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 6, request)
+        double actualAvg = 0
+        woundDist.eachWithIndex { prob, i -> actualAvg += (i * prob) }
+
+        then: "Math: 50% chance on first roll, then reroll 50% of misses for another 50% success"
+        Math.abs(actualAvg - 4.5) < 0.001
+    }
+
+    def "Anti-X should never succeed on a natural 1"() {
+        given: "1 guaranteed hit and an impossible Anti-1+ (which the UI shouldn't allow, but the backend must handle)"
+        double[] hitDist = [0, 1.0]
+        def request = new CalculationRequestDTO(critWoundValue: 1)
+
+        when: "Wounding on a 6+"
+        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 6, request)
+
+        then: "The success rate is 5/6 (2,3,4,5,6) because 1 is a hard-coded failure"
+        Math.abs(woundDist[1] - 0.8333) < 0.001
+    }
 }

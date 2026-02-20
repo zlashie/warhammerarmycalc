@@ -181,19 +181,30 @@ class CalculatorServiceSpec extends Specification {
         Math.abs(result.woundAvgValue - 7.5) < 0.001
     }
 
-    def "calculateArmyHits should handle Devastating Wounds and Reroll ALL, aka Fishing for Crits)"() {
-        given: "1 attack, wounding on 4+, Devastating Wounds and Reroll ALL"
+    def "calculateArmyHits should handle Devastating Wounds and Reroll ALL , aka fishing for Criticals"() {
+        given: "A unit profile optimized for Devastating Wounds (BS 2+, Wounding 4+, Crit 6+, Reroll ALL)"
         def unit = new CalculationRequestDTO(
-            numberOfModels: 1, attacksPerModel: 1, bsValue: 2,
+            numberOfModels: 1, 
+            attacksPerModel: 1, 
+            bsValue: 2,
             woundRerollType: "ALL", 
             devastatingWounds: true,
             critWoundValue: 6
         )
 
-        when:
+        when: "The service processes the attack through the hit and wound pipeline"
         def result = service.calculateArmyHits([unit])
 
-        then: "Math: Single die success is 21/36 (0.5833). Service should reflect this."
+        then: "The average wounds matches fishing logic: Hit(5/6) * P(Wound with Fishing)"
+        /* * Math Breakdown:
+        * Hit Probability = 5/6 (0.8333)
+        * Single Wound Prob with Fishing for 6s (but keeping 4s and 5s):
+        * - Initial roll: 6 (1/6) + [4,5 (2/6) - will be rerolled] + [1,2,3 (3/6) - will be rerolled]
+        * - Because 'Fishing' is active, we reroll all five non-6s.
+        * - Probability = (1/6) + (5/6 * 3/6 success on reroll) 
+        * - Probability = 6/36 + 15/36 = 21/36 (0.5833)
+        * Total EV = 0.8333 * 0.5833 = 0.4861
+        */
         Math.abs(result.woundAvgValue - 0.4861) < 0.001
     }
 }

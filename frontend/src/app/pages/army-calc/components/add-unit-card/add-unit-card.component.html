@@ -67,16 +67,17 @@
       <app-toggle-orb 
         abbreviation="RW" 
         label="Reroll Wounds" 
-        [options]="['1s', 'Fail']"
+        [options]="['1s', 'Fail', 'Fish']"
         [active]="getFriendlyWoundRerollLabel(currentUnit.toggles.rerollWounds)"
         (activeChange)="setWoundRerollFromFriendly($event)">
       </app-toggle-orb>
 
       <app-toggle-orb 
-        abbreviation="X" 
         label="Anti-X" 
-        [options]="['2+', '3+', '4+', '5+']" 
-        [(active)]="currentUnit.toggles.antiX">
+        abbreviation="AX"
+        [options]="['2+', '3+', '4+', '5+']"
+        [active]="getCritLabel(currentUnit.toggles.antiX)"
+        (activeChange)="setAntiXFromFriendly($event)">
       </app-toggle-orb>
 
       <app-toggle-orb
