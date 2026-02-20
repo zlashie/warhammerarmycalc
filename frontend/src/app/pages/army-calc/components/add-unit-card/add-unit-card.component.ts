@@ -80,8 +80,7 @@ export class AddUnitCardComponent {
   }
 
   getCritLabel(value: number): string | boolean {
-    if (value === 4) return '4+';
-    if (value === 5) return '5+';
+    if (value <= 5 && value >= 2) return value + '+';
     return false; 
   }
 
@@ -113,7 +112,11 @@ export class AddUnitCardComponent {
   }
 
   setAntiXFromFriendly(friendly: any) {
-    const val = parseInt(friendly.replace('+', ''));
-    this.currentUnit.toggles.antiX = val;
+    if (!friendly) {
+      this.currentUnit.toggles.antiX = 6;
+    } else {
+      const val = parseInt(friendly.replace('+', ''));
+      this.currentUnit.toggles.antiX = val;
+    }
   }
 }
