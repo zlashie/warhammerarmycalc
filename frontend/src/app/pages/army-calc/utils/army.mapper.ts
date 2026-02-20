@@ -17,8 +17,10 @@ export class ArmyMapper {
         rerollType: typeof rerollValue === 'string' ? rerollValue : "NONE",
         critHitValue: unit.toggles.crit || 6,
         woundRerollType: typeof rerollWounds === 'string' ? rerollWounds : "NONE",
-        DevastatingWounds: !!unit.toggles.devastating,
-        critWoundValue: unit.toggles.antiX || 6
+        devastatingWounds: !!unit.toggles.devastating,
+        critWoundValue: unit.toggles.antiX || 6,
+        plusOneToHit: !!unit.toggles.plusOneHit,
+        plusOneToWound: !!unit.toggles.plusOneWound
       };
     });
   }

@@ -43,7 +43,9 @@ export class AddUnitCardComponent {
         rerollHits: 'NONE',    
         rerollWounds: 'NONE', 
         antiX: 6,         
-        devastating: false    
+        devastating: false,
+        plusOneHit: false,
+        plusOneWound: false   
       }
     };
   }

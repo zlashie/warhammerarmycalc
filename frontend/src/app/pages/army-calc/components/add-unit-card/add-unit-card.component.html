@@ -85,6 +85,18 @@
         abbreviation="DW"
         [(active)]="currentUnit.toggles.devastating">
       </app-toggle-orb>
+
+      <app-toggle-orb 
+        label="Hit" 
+        abbreviation="+1" 
+        [(active)]="currentUnit.toggles.plusOneHit">
+      </app-toggle-orb>
+
+      <app-toggle-orb 
+        label="Wound" 
+        abbreviation="+1" 
+        [(active)]="currentUnit.toggles.plusOneWound">
+      </app-toggle-orb>
     </div>
   </div>
 </app-card>
