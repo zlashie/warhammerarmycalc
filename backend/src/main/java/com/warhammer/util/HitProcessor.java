@@ -138,17 +138,8 @@ public class HitProcessor {
      * Includes "Fishing for Crits" logic where users reroll successful hits to try for 6s.
      */
     private static boolean shouldReroll(int face, int bs, CalculationRequestDTO req) {
-        String type = req.getRerollType();
-        return switch (type) {
-            case "ONES" -> face == 1;
-            case "FAIL" -> face < bs || face == 1;
-            case "ALL"  -> {
-                // If fishing for crits, reroll anything that isn't a Critical Hit
-                if (req.isSustainedHits() || req.isLethalHits()) yield face < req.getCritHitValue();
-                yield face < bs || face == 1;
-            }
-            default -> false;
-        };
+        boolean fishing = req.isSustainedHits() || req.isLethalHits();
+        return DiceUtility.shouldReroll(face, bs, req.getRerollType(), fishing, req.getCritHitValue());
     }
 
     private static int parseBonusValue(String value) {

@@ -166,4 +166,34 @@ class CalculatorServiceSpec extends Specification {
         then: "5/6 hits are lethal -> 0.8333 wounds * 3 damage = 2.5"
         Math.abs(result.damageAvgValue - 2.5) < 0.001 
     }
+
+    def "calculateArmyHits should integrate Wound Reroll FAIL mechanics"() {
+        given: "A unit with 10 hits, wounding on 4+, rerolling fails"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 12, bsValue: 2, 
+            woundRerollType: "FAIL"
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "Math: 10 hits * (0.5 base + (0.5 fail * 0.5 reroll success)) = 7.5 expected wounds"
+        Math.abs(result.woundAvgValue - 7.5) < 0.001
+    }
+
+    def "calculateArmyHits should handle Devastating Wounds and Reroll ALL, aka Fishing for Crits)"() {
+        given: "1 attack, wounding on 4+, Devastating Wounds and Reroll ALL"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 2,
+            woundRerollType: "ALL", 
+            devastatingWounds: true,
+            critWoundValue: 6
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "Math: Single die success is 21/36 (0.5833). Service should reflect this."
+        Math.abs(result.woundAvgValue - 0.4861) < 0.001
+    }
 }

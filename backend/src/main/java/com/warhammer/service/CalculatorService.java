@@ -39,7 +39,7 @@ public class CalculatorService {
         for (CalculationRequestDTO request : requests) {
             // Process individual unit mechanics (Lethal, Sustained, etc.)
             HitResult unitHits = HitProcessor.calculateUnitDistribution(request);
-            double[] unitWounds = calculateUnitWounds(unitHits);
+            double[] unitWounds = calculateUnitWounds(unitHits, request);
 
             // Convolve this unit's results into the total army distribution
             armyHitDist = ProbabilityMath.convolve(armyHitDist, combineStandardAndLethal(unitHits));
@@ -54,14 +54,16 @@ public class CalculatorService {
      * Translates a unit's split hit streams into a unified wound distribution.
      * Merges 'Lethal Hits' (auto-wounds) with 'Standard Hits' that passed a wound roll.
      */
-    private double[] calculateUnitWounds(HitResult hits) {
-        // TODO: Replace hardcoded '4' with target-specific toughness logic
-        double[] standardWounds = WoundProcessor.calculateWoundDistribution(hits.getStandardHits(), 4);
+    private double[] calculateUnitWounds(HitResult hits, CalculationRequestDTO request) {
+        double[] standardWounds = WoundProcessor.calculateWoundDistribution(
+            hits.getStandardHits(), 
+            4, 
+            request
+        );
         
-        // Lethal hits are already wounds; we convolve them to add them to the standard successes
         return ProbabilityMath.convolve(standardWounds, hits.getLethalHits());
     }
-
+    
     /**
      * Combines standard hits and lethal hits into a single array for UI visualization.
      */

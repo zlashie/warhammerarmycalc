@@ -1,38 +1,92 @@
 package com.warhammer.util;
 
+import com.warhammer.dto.CalculationRequestDTO;
+
 /**
- * Handles the transformation of hit distributions into wound distributions.
+ * Orchestrates the wounding phase of the combat math pipeline.
+ * This utility applies the Law of Total Probability to transform a distribution of
+ * successful hits into a distribution of successful wounds.
  */
 public class WoundProcessor {
 
-    /**
-     * Calculates the wound distribution (The "Happy Path" assumes a 4+ roll).
-     * @param hitDist The probability array from the hit phase.
-     * @param targetWoundRoll The D6 result needed (e.g., 4 for a 4+).
-     * @return A new probability distribution for wounds.
-     */
-    public static double[] calculateWoundDistribution(double[] hitDist, int targetWoundRoll) {
-        // Probability of a single wound success (e.g., 4+ is 0.5)
-        double pWound = (7.0 - targetWoundRoll) / 6.0;
-        
-        // The maximum possible wounds cannot exceed the maximum possible hits
-        double[] woundDist = new double[hitDist.length];
+    private static final int D6_SIDES = 6;
+    private static final double PROB_PER_FACE = 1.0 / 6.0;
 
-        // Law of Total Probability: For every possible number of hits...
+    /**
+     * Translates a hit distribution into a final wound distribution.
+     * * @param hitDist The probability array where index 'i' is the chance of 'i' hits.
+     * @param targetWoundRoll The required D6 result (e.g., 4 for a 4+ roll).
+     * @param req The DTO containing active modifiers.
+     * @return A probability distribution array for successful wounds.
+     */
+    public static double[] calculateWoundDistribution(double[] hitDist, int targetWoundRoll, CalculationRequestDTO req) {
+        // 1. Calculate the effective success rate for a single die (Bernoulli trial)
+        double[] singleDieOutcome = new double[2]; // Index 0: Fail, Index 1: Success
+        calculateSingleDieWound(singleDieOutcome, targetWoundRoll, req);
+        double pWound = singleDieOutcome[1];
+
+        double[] totalWoundDist = new double[hitDist.length];
+
+        // 2. Map the Hit distribution to a Wound distribution using the Law of Total Probability
         for (int hits = 0; hits < hitDist.length; hits++) {
             double probOfHits = hitDist[hits];
-            
-            if (probOfHits < 0.0000001) continue;
+            if (probOfHits <= 0) continue;
 
-            // ...calculate the binomial distribution of wounds for that many hits
-            double[] scenarioBinomial = ProbabilityMath.calculateBinomial(hits, pWound);
-
-            // ...and weight it by the probability of that scenario occurring
-            for (int w = 0; w < scenarioBinomial.length; w++) {
-                woundDist[w] += scenarioBinomial[w] * probOfHits;
+            // For each 'n' hits, calculate the binomial distribution of 'k' wounds
+            for (int wounds = 0; wounds <= hits; wounds++) {
+                double probOfKWounds = binomialProbability(hits, wounds, pWound);
+                totalWoundDist[wounds] += probOfHits * probOfKWounds;
             }
         }
-        
-        return woundDist;
+        return totalWoundDist;
+    }
+
+    /**
+     * Simulates a single D6 roll to find the aggregate success rate.
+     */
+    private static void calculateSingleDieWound(double[] outcomes, int target, CalculationRequestDTO req) {
+        for (int face = 1; face <= D6_SIDES; face++) {
+            // Check if the specific face triggers a reroll based on user strategy
+            if (DiceUtility.shouldReroll(face, target, req.getWoundRerollType(), req.isDevastatingWounds(), req.getCritWoundValue())) {
+                for (int rerollFace = 1; rerollFace <= D6_SIDES; rerollFace++) {
+                    processWoundFace(rerollFace, target, outcomes, PROB_PER_FACE * PROB_PER_FACE);
+                }
+            } else {
+                processWoundFace(face, target, outcomes, PROB_PER_FACE);
+            }
+        }
+    }
+
+    /**
+     * Evaluates a specific D6 face against wounding criteria.
+     * 40k Logic: 1s always fail, 6s always wound (unless modified by rules).
+     */
+    private static void processWoundFace(int face, int target, double[] outcomes, double prob) {
+        boolean isWound = (face >= target || face == 6) && face != 1;
+        if (isWound) {
+            outcomes[1] += prob;
+        } else {
+            outcomes[0] += prob;
+        }
+    }
+
+    /**
+     * Standard Binomial Formula: P(k; n, p) = (n choose k) * p^k * (1-p)^(n-k)
+     */
+    private static double binomialProbability(int n, int k, double p) {
+        if (p <= 0 && k > 0) return 0;
+        if (p >= 1 && k < n) return 0;
+        return combinations(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+    }
+
+    private static long combinations(int n, int k) {
+        if (k < 0 || k > n) return 0;
+        if (k == 0 || k == n) return 1;
+        if (k > n / 2) k = n - k;
+        long res = 1;
+        for (int i = 1; i <= k; i++) {
+            res = res * (n - i + 1) / i;
+        }
+        return res;
     }
 }
