@@ -37,12 +37,10 @@ public class CalculatorService {
         double[] armyWoundDist = INITIAL_STATE;
 
         for (CalculationRequestDTO request : requests) {
-            // Process individual unit mechanics (Lethal, Sustained, etc.)
             HitResult unitHits = HitProcessor.calculateUnitDistribution(request);
             double[] unitWounds = calculateUnitWounds(unitHits, request);
 
-            // Convolve this unit's results into the total army distribution
-            armyHitDist = ProbabilityMath.convolve(armyHitDist, combineStandardAndLethal(unitHits));
+            armyHitDist = ProbabilityMath.convolve(armyHitDist, unitHits.getTotalVisualHits());
             armyWoundDist = ProbabilityMath.convolve(armyWoundDist, unitWounds);
         }
 
@@ -64,13 +62,6 @@ public class CalculatorService {
         return ProbabilityMath.convolve(standardWounds, hits.getLethalHits());
     }
     
-    /**
-     * Combines standard hits and lethal hits into a single array for UI visualization.
-     */
-    private double[] combineStandardAndLethal(HitResult hits) {
-        return ProbabilityMath.convolve(hits.getStandardHits(), hits.getLethalHits());
-    }
-
     /**
      * Performs final damage calculation and attaches statistical analysis (Averages, Ranges, etc.)
      */

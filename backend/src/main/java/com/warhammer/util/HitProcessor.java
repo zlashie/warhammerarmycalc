@@ -24,33 +24,30 @@ public class HitProcessor {
     public static HitResult calculateUnitDistribution(CalculationRequestDTO request) {
         int totalAttacks = request.getNumberOfModels() * request.getAttacksPerModel();
         if (totalAttacks <= 0) {
-            return new HitResult(new double[]{1.0}, new double[]{1.0});
+            return new HitResult(new double[]{1.0}, new double[]{1.0}, new double[]{1.0});
         }
 
         double[] singleStandard = new double[STANDARD_HITS_ARRAY_SIZE];
         double[] singleLethal = new double[LETHAL_HITS_ARRAY_SIZE];
+        double[] singleTotal = new double[STANDARD_HITS_ARRAY_SIZE]; // NEW
 
-        // 1. Determine the outcome of a single D6 roll
-        calculateSingleDieOutcomes(singleStandard, singleLethal, request);
-
-        // 2. Scale the single die results to the total number of attacks using convolution
-        return scaleToTotalAttacks(singleStandard, singleLethal, totalAttacks);
+        calculateSingleDieOutcomes(singleStandard, singleLethal, singleTotal, request);
+        return scaleToTotalAttacks(singleStandard, singleLethal, singleTotal, totalAttacks);
     }
 
     /**
      * Iterates through all possible D6 faces to build the probability map for one attack,
      * accounting for reroll logic if applicable.
      */
-    private static void calculateSingleDieOutcomes(double[] std, double[] lethal, CalculationRequestDTO req) {
+    private static void calculateSingleDieOutcomes(double[] std, double[] lethal, double[] total, CalculationRequestDTO req) {
         int bs = req.getBsValue();
         for (int face = 1; face <= D6_SIDES; face++) {
             if (shouldReroll(face, bs, req)) {
-                // If rerolling, calculate the average outcome of the second roll
                 for (int rerollFace = 1; rerollFace <= D6_SIDES; rerollFace++) {
-                    processDiceFace(rerollFace, std, lethal, req, PROB_PER_FACE * PROB_PER_FACE);
+                    processDiceFace(rerollFace, std, lethal, total, req, PROB_PER_FACE * PROB_PER_FACE);
                 }
             } else {
-                processDiceFace(face, std, lethal, req, PROB_PER_FACE);
+                processDiceFace(face, std, lethal, total, req, PROB_PER_FACE);
             }
         }
     }
@@ -58,29 +55,32 @@ public class HitProcessor {
     /**
      * Categorizes a single dice face into its game outcome (Miss, Hit, Lethal, or Sustained).
      */
-    private static void processDiceFace(int face, double[] std, double[] lethal, CalculationRequestDTO req, double prob) {
+    private static void processDiceFace(int face, double[] std, double[] lethal, double[] total, CalculationRequestDTO req, double prob) {
         boolean isCrit = face >= req.getCritHitValue();
         int effectiveRoll = req.isPlusOneToHit() ? face + 1 : face;
         boolean isHit = effectiveRoll >= req.getBsValue() && face != 1;
 
         if (isCrit && req.isLethalHits()) {
             lethal[1] += prob;
-            
             if (req.isSustainedHits()) {
                 applySustainedExplosionOnly(std, req.getSustainedValue(), prob);
-                lethal[0] += 0; 
+                applySustainedWithBase(total, req.getSustainedValue(), prob); // 1 Lethal + Sustained Bonus
             } else {
                 std[0] += prob; 
+                total[1] += prob; // Exactly 1 hit
             }
         } else if (isCrit && req.isSustainedHits()) {
             lethal[0] += prob;
             applySustainedWithBase(std, req.getSustainedValue(), prob);
+            applySustainedWithBase(total, req.getSustainedValue(), prob);
         } else if (isHit) {
             std[1] += prob;
             lethal[0] += prob;
+            total[1] += prob;
         } else {
             std[0] += prob;
             lethal[0] += prob;
+            total[0] += prob;
         }
     }
 
@@ -120,15 +120,17 @@ public class HitProcessor {
     /**
      * Combines single-attack distributions into a total unit distribution.
      */
-    private static HitResult scaleToTotalAttacks(double[] singleStd, double[] singleLethal, int totalAttacks) {
+    private static HitResult scaleToTotalAttacks(double[] singleStd, double[] singleLethal, double[] singleTotal, int totalAttacks) {
         double[] totalStd = {1.0};
         double[] totalLethal = {1.0};
+        double[] trueTotalHits = {1.0}; // NEW
 
         for (int i = 0; i < totalAttacks; i++) {
             totalStd = ProbabilityMath.convolve(totalStd, singleStd);
             totalLethal = ProbabilityMath.convolve(totalLethal, singleLethal);
+            trueTotalHits = ProbabilityMath.convolve(trueTotalHits, singleTotal); // NEW
         }
-        return new HitResult(totalStd, totalLethal);
+        return new HitResult(totalStd, totalLethal, trueTotalHits);
     }
 
     /**

@@ -78,19 +78,21 @@ public class WoundProcessor {
      * Standard Binomial Formula: P(k; n, p) = (n choose k) * p^k * (1-p)^(n-k)
      */
     private static double binomialProbability(int n, int k, double p) {
-        if (p <= 0 && k > 0) return 0;
-        if (p >= 1 && k < n) return 0;
+        if (p <= 0 && k > 0) return 0.0;
+        if (p >= 1 && k < n) return 0.0;
         return combinations(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
     }
 
-    private static long combinations(int n, int k) {
-        if (k < 0 || k > n) return 0;
-        if (k == 0 || k == n) return 1;
+    private static double combinations(int n, int k) {
+        if (k < 0 || k > n) return 0.0;
+        if (k == 0 || k == n) return 1.0;
         if (k > n / 2) k = n - k;
-        long res = 1;
+
+        double res = 1.0;
         for (int i = 1; i <= k; i++) {
             res = res * (n - i + 1) / i;
         }
+        
         return res;
     }
 }
