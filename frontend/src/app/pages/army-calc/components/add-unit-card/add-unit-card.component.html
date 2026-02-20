@@ -35,6 +35,13 @@
     <hr class="card-divider">
 
     <div class="toggle-grid">
+
+      <app-toggle-orb 
+        label="Hit" 
+        abbreviation="+1" 
+        [(active)]="currentUnit.toggles.plusOneHit">
+      </app-toggle-orb>
+
       <app-toggle-orb 
         label="Lethal Hits" 
         abbreviation="LH" 
@@ -49,7 +56,7 @@
       </app-toggle-orb>
 
       <app-toggle-orb 
-        label="Crit (Hit)" 
+        label="Crit" 
         abbreviation="CH"
         [options]="['4+', '5+']"
         [active]="getCritLabel(currentUnit.toggles.crit)"
@@ -65,11 +72,15 @@
       </app-toggle-orb>
 
       <app-toggle-orb 
-        abbreviation="RW" 
-        label="Reroll Wounds" 
-        [options]="['1s', 'Fail', 'Fish']"
-        [active]="getFriendlyWoundRerollLabel(currentUnit.toggles.rerollWounds)"
-        (activeChange)="setWoundRerollFromFriendly($event)">
+        label="Wound" 
+        abbreviation="+1" 
+        [(active)]="currentUnit.toggles.plusOneWound">
+      </app-toggle-orb>
+
+      <app-toggle-orb
+        label="Dev Wounds"
+        abbreviation="DW"
+        [(active)]="currentUnit.toggles.devastating">
       </app-toggle-orb>
 
       <app-toggle-orb 
@@ -80,22 +91,12 @@
         (activeChange)="setAntiXFromFriendly($event)">
       </app-toggle-orb>
 
-      <app-toggle-orb
-        label="Dev Wounds"
-        abbreviation="DW"
-        [(active)]="currentUnit.toggles.devastating">
-      </app-toggle-orb>
-
       <app-toggle-orb 
-        label="Hit" 
-        abbreviation="+1" 
-        [(active)]="currentUnit.toggles.plusOneHit">
-      </app-toggle-orb>
-
-      <app-toggle-orb 
-        label="Wound" 
-        abbreviation="+1" 
-        [(active)]="currentUnit.toggles.plusOneWound">
+        abbreviation="RW" 
+        label="Reroll Wounds" 
+        [options]="['1s', 'Fail', 'Fish']"
+        [active]="getFriendlyWoundRerollLabel(currentUnit.toggles.rerollWounds)"
+        (activeChange)="setWoundRerollFromFriendly($event)">
       </app-toggle-orb>
     </div>
   </div>
