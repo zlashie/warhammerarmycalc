@@ -59,7 +59,6 @@ export class AddUnitCardComponent {
     };
 
     this.unitAdded.emit(unitData);
-    this.currentUnit = this.getInitialUnitState();
   }
 
   getFriendlyRerollLabel(value: string): string {

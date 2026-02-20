@@ -67,7 +67,11 @@ export class ArmyCalcComponent {
     });
   }
 
-  onSaveUnit(unit: any) { this.store.upsertUnit(unit); }
+  onSaveUnit(unit: any) { 
+    this.store.upsertUnit(unit); 
+    this.store.selectedUnit.set(unit); 
+  }
+  
   removeUnit(id: number) { this.store.removeUnit(id); }
   onEditUnit(unit: any | null) { this.store.selectedUnit.set(unit); }
 }
