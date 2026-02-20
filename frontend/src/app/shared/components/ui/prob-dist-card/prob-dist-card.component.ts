@@ -105,7 +105,7 @@ export class ProbDistCardComponent {
       {
         value: range80,
         label: '80% Range',
-        sub: 'Reliable',
+        sub: 'Reliability',
         cssClass: range80.length > 3 ? 'long-value' : ''
       },
       {
