@@ -193,4 +193,23 @@ class WoundProcessorSpec extends Specification {
         then: "The success rate is 5/6 (2,3,4,5,6) because 1 is a hard-coded failure"
         Math.abs(woundDist[1] - 0.8333) < 0.001
     }
+
+    def "Plus One to Wound should improve success rate but natural 1 still fails"() {
+        given: "10 hits on a 4+ to wound with +1 modifier"
+        double[] hitDist = new double[11]
+        hitDist[10] = 1.0
+        def request = new CalculationRequestDTO(plusOneToWound: true)
+
+        when: "Calculating wounds"
+        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 4, request)
+        
+        double actualAvg = 0
+        woundDist.eachWithIndex { prob, i -> actualAvg += (i * prob) }
+
+        then: "Success on natural 3, 4, 5, 6 (4/6 prob)."
+        Math.abs(actualAvg - 6.6666) < 0.001
+        
+        and: "The probability of 0 wounds should be (2/6)^10"
+        Math.abs(woundDist[0] - Math.pow(2/6.0, 10)) < 0.000001
+    }
 }

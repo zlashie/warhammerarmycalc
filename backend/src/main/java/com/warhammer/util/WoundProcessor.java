@@ -45,15 +45,15 @@ public class WoundProcessor {
      * Simulates a single D6 roll to find the aggregate success rate.
      */
     private static void calculateSingleDieWound(double[] outcomes, int target, CalculationRequestDTO req) {
-        int critValue = req.getCritWoundValue(); // Get the Anti-X value (e.g., 2, 3, 4)
+        int critValue = req.getCritWoundValue(); 
 
         for (int face = 1; face <= D6_SIDES; face++) {
             if (DiceUtility.shouldReroll(face, target, req.getWoundRerollType(), req.isDevastatingWounds(), critValue)) {
                 for (int rerollFace = 1; rerollFace <= D6_SIDES; rerollFace++) {
-                    processWoundFace(rerollFace, target, outcomes, PROB_PER_FACE * PROB_PER_FACE, critValue);
+                    processWoundFace(rerollFace, target, outcomes, PROB_PER_FACE * PROB_PER_FACE, critValue, req);
                 }
             } else {
-                processWoundFace(face, target, outcomes, PROB_PER_FACE, critValue);
+                processWoundFace(face, target, outcomes, PROB_PER_FACE, critValue, req);
             }
         }
     }
@@ -62,9 +62,10 @@ public class WoundProcessor {
      * Evaluates a specific D6 face against wounding criteria.
      * 40k Logic: 1s always fail, 6s always wound (unless modified by rules).
      */
-    private static void processWoundFace(int face, int target, double[] outcomes, double prob, int critValue) {
+    private static void processWoundFace(int face, int target, double[] outcomes, double prob, int critValue, CalculationRequestDTO req) {
         boolean isCrit = face >= critValue; 
-        boolean isWound = (face >= target || isCrit || face == 6) && face != 1;
+        int effectiveRoll = req.isPlusOneToWound() ? face + 1 : face;
+        boolean isWound = (effectiveRoll >= target || isCrit || face == 6) && face != 1;
 
         if (isWound) {
             outcomes[1] += prob;

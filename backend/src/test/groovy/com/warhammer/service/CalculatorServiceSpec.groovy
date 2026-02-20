@@ -207,4 +207,25 @@ class CalculatorServiceSpec extends Specification {
         */
         Math.abs(result.woundAvgValue - 0.4861) < 0.001
     }
+
+    def "calculateArmyHits should correctly apply +1 to hit and +1 to wound modifiers"() {
+        given: "A unit with BS 4+ and Wounding on 4+ (hardcoded in service), with +1 to both rolls"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, 
+            attacksPerModel: 10, 
+            bsValue: 4, 
+            plusOneToHit: true,   
+            plusOneToWound: true,
+            damageValue: "1" 
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "Expected Hits: 10 * (4/6) = 6.6667"
+        Math.abs(result.avgValue - 6.6667) < 0.001
+
+        and: "Expected Wounds: 6.6667 * (4/6) = 4.4444"
+        Math.abs(result.woundAvgValue - 4.4444) < 0.001
+    }
 }

@@ -60,21 +60,19 @@ public class HitProcessor {
      */
     private static void processDiceFace(int face, double[] std, double[] lethal, CalculationRequestDTO req, double prob) {
         boolean isCrit = face >= req.getCritHitValue();
-        boolean isHit = face >= req.getBsValue() && face != 1;
+        int effectiveRoll = req.isPlusOneToHit() ? face + 1 : face;
+        boolean isHit = effectiveRoll >= req.getBsValue() && face != 1;
 
         if (isCrit && req.isLethalHits()) {
-            // LETHAL: The 6 goes to auto-wounds
             lethal[1] += prob;
             
-            // If it's ALSO sustained, the explosion is just a regular hit (index 1)
             if (req.isSustainedHits()) {
                 applySustainedExplosionOnly(std, req.getSustainedValue(), prob);
-                lethal[0] += 0; // Already lethal
+                lethal[0] += 0; 
             } else {
-                std[0] += prob; // No standard hits from this die
+                std[0] += prob; 
             }
         } else if (isCrit && req.isSustainedHits()) {
-            // SUSTAINED ONLY: Base hit (1) + Bonus
             lethal[0] += prob;
             applySustainedWithBase(std, req.getSustainedValue(), prob);
         } else if (isHit) {

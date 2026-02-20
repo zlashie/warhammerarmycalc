@@ -20,11 +20,8 @@ class HitProcessorSpec extends Specification {
     def "calculateUnitDistribution for BS #bs should have max hit potential of #expectedMaxIndex"() {
         given: "A request for a unit"
         def request = new CalculationRequestDTO(
-            numberOfModels: models, 
-            attacksPerModel: attacks, 
-            bsValue: bs,
-            sustainedHits: false,
-            lethalHits: false
+            numberOfModels: models, attacksPerModel: attacks, bsValue: bs,
+            sustainedHits: false, lethalHits: false
         )
 
         when: "The total distribution is calculated"
@@ -38,9 +35,9 @@ class HitProcessorSpec extends Specification {
 
         where:
         models | attacks | bs || expectedMaxIndex
-        10     | 1       | 4  || 10               
-        1      | 20      | 3  || 20               
-        5      | 2       | 2  || 10               
+        10     | 1       | 4  || 10                
+        1      | 20      | 3  || 20                
+        5      | 2       | 2  || 10                
     }
 
     def "Sustained Hits should increase the maximum possible hits"() {
@@ -186,5 +183,22 @@ class HitProcessorSpec extends Specification {
 
         then: "Probability of a 6 is (1/6) + (5/6 * 1/6) = 11/36"
         Math.abs(lethalProb - 11/36.0) < 0.000001
+    }
+
+    def "Plus One to Hit should improve success rate but natural 1 still fails"() {
+        given: "BS 4+ with +1 modifier"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 4,
+            plusOneToHit: true
+        )
+
+        when: "Calculating hits"
+        double[] dist = getTotalDist(request)
+
+        then: "Hits on natural 3, 4, 5, 6 (4/6 prob). Natural 1 and 2 fail."
+        Math.abs(dist[1] - 4/6.0) < 0.000001
+        
+        and: "The miss probability is 2/6"
+        Math.abs(dist[0] - 2/6.0) < 0.000001
     }
 }

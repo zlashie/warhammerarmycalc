@@ -14,6 +14,8 @@ public class CalculationRequestDTO {
     private String woundRerollType; 
     private int critWoundValue = 6;
     private boolean devastatingWounds;
+    private boolean plusOneToHit;
+    private boolean plusOneToWound;
 
     public CalculationRequestDTO() {}
 
@@ -55,4 +57,10 @@ public class CalculationRequestDTO {
 
     public boolean isDevastatingWounds() { return devastatingWounds; }
     public void setDevastatingWounds(boolean devastatingWounds) { this.devastatingWounds = devastatingWounds; }
+
+    public boolean isPlusOneToHit() { return plusOneToHit; }
+    public void setPlusOneToHit(boolean plusOneToHit) { this.plusOneToHit = plusOneToHit; }
+    
+    public boolean isPlusOneToWound() { return plusOneToWound; }
+    public void setPlusOneToWound(boolean plusOneToWound) { this.plusOneToWound = plusOneToWound; }
 }
