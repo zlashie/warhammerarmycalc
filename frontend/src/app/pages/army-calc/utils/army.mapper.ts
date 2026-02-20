@@ -3,6 +3,7 @@ export class ArmyMapper {
     return units.map(unit => {
       const sActive = unit.toggles.sustained;
       const rerollValue = unit.toggles.rerollHits;
+      const rerollWounds = unit.toggles.rerollWounds;
 
       return {
         unitName: unit.name,
@@ -14,7 +15,10 @@ export class ArmyMapper {
         sustainedHits: !!sActive,
         sustainedValue: typeof sActive === 'string' ? sActive : (sActive ? "1" : "0"),
         rerollType: typeof rerollValue === 'string' ? rerollValue : "NONE",
-        critHitValue: unit.toggles.crit || 6
+        critHitValue: unit.toggles.crit || 6,
+        woundRerollType: typeof rerollWounds === 'string' ? rerollWounds : "NONE",
+        DevastatingWounds: !!unit.toggles.devastating,
+        critWoundValue: unit.toggles.crit || 6
       };
     });
   }

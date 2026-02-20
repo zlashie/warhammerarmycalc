@@ -67,8 +67,9 @@
       <app-toggle-orb 
         abbreviation="RW" 
         label="Reroll Wounds" 
-        [options]="['1s', 'Fail', 'All']" 
-        [(active)]="currentUnit.toggles.rerollWounds">
+        [options]="['1s', 'Fail']"
+        [active]="getFriendlyWoundRerollLabel(currentUnit.toggles.rerollWounds)"
+        (activeChange)="setWoundRerollFromFriendly($event)">
       </app-toggle-orb>
 
       <app-toggle-orb 
@@ -78,7 +79,11 @@
         [(active)]="currentUnit.toggles.antiX">
       </app-toggle-orb>
 
-      <app-toggle-orb abbreviation="D" label="Dev Wounds" [(active)]="currentUnit.toggles.devastating"></app-toggle-orb>
+      <app-toggle-orb
+        label="Dev Wounds"
+        abbreviation="DW"
+        [(active)]="currentUnit.toggles.devastating">
+      </app-toggle-orb>
     </div>
   </div>
 </app-card>
