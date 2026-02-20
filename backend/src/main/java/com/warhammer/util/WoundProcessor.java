@@ -4,8 +4,8 @@ import com.warhammer.dto.CalculationRequestDTO;
 
 /**
  * Orchestrates the wounding phase of the combat math pipeline.
- * This utility applies the Law of Total Probability to transform a distribution of
- * successful hits into a distribution of successful wounds.
+ * This utility applies iterative convolution to transform a distribution of
+ * successful hits into a distribution of successful wounds, avoiding factorial overflow.
  */
 public class WoundProcessor {
 
@@ -13,31 +13,44 @@ public class WoundProcessor {
     private static final double PROB_PER_FACE = 1.0 / 6.0;
 
     /**
-     * Translates a hit distribution into a final wound distribution.
-     * * @param hitDist The probability array where index 'i' is the chance of 'i' hits.
+     * Translates a hit distribution into a final wound distribution using convolution.
+     *
+     * @param hitDist The probability array where index 'i' is the chance of 'i' hits.
      * @param targetWoundRoll The required D6 result (e.g., 4 for a 4+ roll).
      * @param req The DTO containing active modifiers.
      * @return A probability distribution array for successful wounds.
      */
     public static double[] calculateWoundDistribution(double[] hitDist, int targetWoundRoll, CalculationRequestDTO req) {
-        // 1. Calculate the effective success rate for a single die (Bernoulli trial)
+        if (hitDist == null || hitDist.length == 0) {
+            return new double[]{1.0};
+        }
+
+        // 1. Calculate the effective success rate for a single die
         double[] singleDieOutcome = new double[2]; // Index 0: Fail, Index 1: Success
         calculateSingleDieWound(singleDieOutcome, targetWoundRoll, req);
-        double pWound = singleDieOutcome[1];
 
         double[] totalWoundDist = new double[hitDist.length];
 
-        // 2. Map the Hit distribution to a Wound distribution using the Law of Total Probability
+        // 2. Optimization: Iterative Convolution (Mirrors DamageProcessor logic)
+        // Start with a distribution representing 0 hits (100% chance of 0 wounds)
+        double[] currentWoundDist = {1.0};
+
         for (int hits = 0; hits < hitDist.length; hits++) {
             double probOfHits = hitDist[hits];
-            if (probOfHits <= 0) continue;
 
-            // For each 'n' hits, calculate the binomial distribution of 'k' wounds
-            for (int wounds = 0; wounds <= hits; wounds++) {
-                double probOfKWounds = binomialProbability(hits, wounds, pWound);
-                totalWoundDist[wounds] += probOfHits * probOfKWounds;
+            // If this specific hit count actually happens, add its resulting wounds to the total
+            if (probOfHits > 0.0000001) {
+                for (int w = 0; w < currentWoundDist.length; w++) {
+                    totalWoundDist[w] += currentWoundDist[w] * probOfHits;
+                }
+            }
+
+            // Convolve one additional wound die to prepare for the next 'hits' iteration
+            if (hits < hitDist.length - 1) {
+                currentWoundDist = ProbabilityMath.convolve(currentWoundDist, singleDieOutcome);
             }
         }
+        
         return totalWoundDist;
     }
 
@@ -72,27 +85,5 @@ public class WoundProcessor {
         } else {
             outcomes[0] += prob;
         }
-    }
-
-    /**
-     * Standard Binomial Formula: P(k; n, p) = (n choose k) * p^k * (1-p)^(n-k)
-     */
-    private static double binomialProbability(int n, int k, double p) {
-        if (p <= 0 && k > 0) return 0.0;
-        if (p >= 1 && k < n) return 0.0;
-        return combinations(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
-    }
-
-    private static double combinations(int n, int k) {
-        if (k < 0 || k > n) return 0.0;
-        if (k == 0 || k == n) return 1.0;
-        if (k > n / 2) k = n - k;
-
-        double res = 1.0;
-        for (int i = 1; i <= k; i++) {
-            res = res * (n - i + 1) / i;
-        }
-        
-        return res;
     }
 }
