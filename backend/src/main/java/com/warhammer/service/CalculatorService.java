@@ -126,17 +126,17 @@ public class CalculatorService {
 
     /**
      * Implements 10th Ed Save Logic:
-     * 1 is always a fail. AP modifies the save requirement.
+     * 1 is always a fail. AP modifies the save requirement by increasing the target number.
      */
     private double calculateFailProbability(int baseSave, int ap) {
         if (baseSave > 6) return 1.0; 
         
-        int modifiedSave = baseSave + ap; 
-        
+        int modifiedSave = baseSave + Math.abs(ap); 
+
         if (modifiedSave > 6) return 1.0; 
         if (modifiedSave < 2) modifiedSave = 2;
         
-        return (modifiedSave - 1) / 6.0;
+        return (double)(modifiedSave - 1) / 6.0;
     }
 
     /**

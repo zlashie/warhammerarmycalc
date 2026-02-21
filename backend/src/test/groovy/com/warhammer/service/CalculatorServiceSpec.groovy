@@ -196,15 +196,6 @@ class CalculatorServiceSpec extends Specification {
         def result = service.calculateArmyHits([unit])
 
         then: "The average wounds matches fishing logic: Hit(5/6) * P(Wound with Fishing)"
-        /* * Math Breakdown:
-        * Hit Probability = 5/6 (0.8333)
-        * Single Wound Prob with Fishing for 6s (but keeping 4s and 5s):
-        * - Initial roll: 6 (1/6) + [4,5 (2/6) - will be rerolled] + [1,2,3 (3/6) - will be rerolled]
-        * - Because 'Fishing' is active, we reroll all five non-6s.
-        * - Probability = (1/6) + (5/6 * 3/6 success on reroll) 
-        * - Probability = 6/36 + 15/36 = 21/36 (0.5833)
-        * Total EV = 0.8333 * 0.5833 = 0.4861
-        */
         Math.abs(result.woundAvgValue - 0.4861) < 0.001
     }
 
@@ -262,11 +253,9 @@ class CalculatorServiceSpec extends Specification {
         def result = service.calculateArmyHits([unit])
 
         then: "Against a 2+ save, AP -3 forces a 5+ save (50% fail chance)"
-        // Math: 10 * 4/6 (hits) * 1/2 (wounds) * 4/6 (failed 5+ saves) = 2.222
         Math.abs(result.saveScaling[0].average - 2.2222) < 0.01
         
         and: "Against a 4+ save, AP -3 makes it impossible (None/7+)"
-        // Math: 10 * 4/6 * 1/2 * 1.0 (fail chance) = 3.3333
         Math.abs(result.saveScaling[2].average - 3.3333) < 0.01
     }
 
@@ -283,5 +272,24 @@ class CalculatorServiceSpec extends Specification {
 
         then: "At AP -10, even a 2+ save profile should take max damage (relative to the T4 wounding baseline)"
         Math.abs(result.saveScaling[0].average - 2.5) < 0.01
+    }
+
+    def "Save Scaling should be agnostic to the sign of the AP value"() {
+        given: "Two units with identical stats but opposite AP signs"
+        def unitPos = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 12, bsValue: 3, 
+            strength: 4, ap: 2, damageValue: "1"
+        )
+        def unitNeg = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 12, bsValue: 3, 
+            strength: 4, ap: -2, damageValue: "1"
+        )
+
+        when: "Calculating performance for both"
+        def resPos = service.calculateArmyHits([unitPos])
+        def resNeg = service.calculateArmyHits([unitNeg])
+
+        then: "Both should produce the exact same average damage scaling"
+        resPos.saveScaling.collect { it.average } == resNeg.saveScaling.collect { it.average }
     }
 }
