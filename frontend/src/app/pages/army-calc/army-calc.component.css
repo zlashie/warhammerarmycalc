@@ -10,6 +10,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     margin-top: 2rem;
+    margin-bottom: 2rem;
     align-items: start;
 }
 
@@ -23,6 +24,8 @@
     min-width: 0; 
 }
 
-@media (max-width: 768px) {
-    .grid-container { grid-template-columns: 1fr; }
+@media (max-width: 1200px) {
+    .grid-container { 
+        grid-template-columns: 1fr;
+    }
 }
