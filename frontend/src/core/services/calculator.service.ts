@@ -2,6 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+// NEW: Interface for the graph data points
+export interface ToughnessNode {
+  toughness: number;
+  average: number;
+  lower80: number;
+  upper80: number;
+}
+
 export interface CalcResult {
   // Hit Stats
   avgValue: number;
@@ -24,6 +32,9 @@ export interface CalcResult {
   damageRange80?: string;
   damageRangeTop5?: string;
   damageProbAtLeastAvg?: number;
+
+  // NEW: Toughness Scaling Data
+  toughnessScaling?: ToughnessNode[];
 }
 
 @Injectable({

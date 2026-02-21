@@ -5,57 +5,110 @@ import com.warhammer.dto.CalculationResultDTO;
 import com.warhammer.util.*;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Orchestrates the probability pipeline for Warhammer 40,000 combat math.
- * * This service implements a sequential calculation pipeline:
- * 1. Unit-level Hit/Wound generation.
- * 2. Army-level distribution convolution.
- * 3. Final damage transformation and statistical enrichment.
+ * <p>
+ * This service executes a multi-stage statistical analysis:
+ * 1. <strong>Hit Generation:</strong> Calculates hit distributions for all units, accounting for modifiers.
+ * 2. <strong>Standard Projection:</strong> Projects wounds and damage against a standard baseline (Toughness 4).
+ * 3. <strong>Toughness Scaling:</strong> Iteratively calculates performance across the Toughness spectrum (T1-T12)
+ * to generate trend analysis graphs.
  */
 @Service
 public class CalculatorService {
 
     private static final double ROUNDING_PRECISION = 10000.0;
     private static final double[] INITIAL_STATE = {1.0};
+    private static final int MAX_TOUGHNESS_GRAPH = 12;
 
     /**
-     * Entry point for calculating the combat outcome of one or more units.
-     * * @param requests List of unit profiles (Attacks, BS, Modifiers).
-     * @return A detailed report containing probability distributions and statistics.
+     * Primary entry point for combat analysis.
+     * Calculates the aggregate outcome of an army list against both a standard target and a spectrum of toughness values.
+     *
+     * @param requests List of unit profiles containing stats (Attacks, BS, Strength) and active modifiers.
+     * @return A {@link CalculationResultDTO} containing probability distributions, statistical averages, and scaling graphs.
      */
     public CalculationResultDTO calculateArmyHits(List<CalculationRequestDTO> requests) {
         if (isRequestInvalid(requests)) {
             return createBaseResult(INITIAL_STATE);
         }
 
-        // Accumulators for army-wide performance
+        // 1. PRE-CALCULATE HITS
+        // Hit distributions are independent of the target's Toughness, so we calculate them once and reuse them.
+        List<HitResult> allUnitHits = new ArrayList<>();
         double[] armyHitDist = INITIAL_STATE;
-        double[] armyWoundDist = INITIAL_STATE;
 
         for (CalculationRequestDTO request : requests) {
             HitResult unitHits = HitProcessor.calculateUnitDistribution(request);
-            double[] unitWounds = calculateUnitWounds(unitHits, request);
-
+            allUnitHits.add(unitHits);
+            
+            // Convolve this unit's hits into the total army hit distribution
             armyHitDist = ProbabilityMath.convolve(armyHitDist, unitHits.getTotalVisualHits());
-            armyWoundDist = ProbabilityMath.convolve(armyWoundDist, unitWounds);
         }
 
-        // Final phase: Transform wounds into damage and enrich with statistics
-        return finalizeResults(requests, armyHitDist, armyWoundDist);
+        // 2. STANDARD PIPELINE (Baseline Analysis)
+        // Calculates the "Wounds" and "Damage" cards assuming a standard target (Hardcoded T4).
+        double[] standardArmyWounds = INITIAL_STATE;
+        for (int i = 0; i < requests.size(); i++) {
+            double[] unitWounds = calculateUnitWounds(allUnitHits.get(i), 4, requests.get(i));
+            standardArmyWounds = ProbabilityMath.convolve(standardArmyWounds, unitWounds);
+        }
+        
+        CalculationResultDTO result = finalizeResults(requests, armyHitDist, standardArmyWounds);
+
+        // 3. TOUGHNESS SCALING PIPELINE (Trend Analysis)
+        // Iterates from T1 to T12, recalculating wound probabilities based on S vs T breakpoints.
+        List<CalculationResultDTO.ToughnessNode> scalingData = new ArrayList<>();
+
+        for (int t = 1; t <= MAX_TOUGHNESS_GRAPH; t++) {
+            double[] iterationArmyWounds = INITIAL_STATE;
+
+            for (int i = 0; i < requests.size(); i++) {
+                // Determine the required wound roll (2+, 3+, 4+, 5+, 6+) for this specific unit vs Toughness 't'
+                int requiredRoll = getWoundRoll(requests.get(i).getStrength(), t);
+                
+                double[] unitWounds = calculateUnitWounds(allUnitHits.get(i), requiredRoll, requests.get(i));
+                iterationArmyWounds = ProbabilityMath.convolve(iterationArmyWounds, unitWounds);
+            }
+
+            scalingData.add(extractNodeStats(t, iterationArmyWounds));
+        }
+
+        result.setToughnessScaling(scalingData);
+        return result;
     }
 
     /**
-     * Translates a unit's split hit streams into a unified wound distribution.
-     * Merges 'Lethal Hits' (auto-wounds) with 'Standard Hits' that passed a wound roll.
+     * Determines the required D6 result to wound a target based on 10th Edition rules.
+     * <ul>
+     * <li>S >= 2xT : 2+</li>
+     * <li>S > T    : 3+</li>
+     * <li>S = T    : 4+</li>
+     * <li>S < T    : 5+</li>
+     * <li>S <= T/2 : 6+</li>
+     * </ul>
      */
-    private double[] calculateUnitWounds(HitResult hits, CalculationRequestDTO request) {
+    private int getWoundRoll(int strength, int toughness) {
+        if (strength >= toughness * 2) return 2;
+        if (strength > toughness)      return 3;
+        if (strength == toughness)     return 4;
+        if (strength <= toughness / 2) return 6;
+        return 5;
+    }
+
+    /**
+     * Transforms a unit's hit distribution into a wound distribution.
+     * Merges "Lethal Hits" (which bypass the wound roll) with standard hits that successfully roll to wound.
+     */
+    private double[] calculateUnitWounds(HitResult hits, int targetWoundRoll, CalculationRequestDTO request) {
         double[] standardWounds = WoundProcessor.calculateWoundDistribution(
             hits.getStandardHits(), 
-            4, 
+            targetWoundRoll, 
             request
         );
         
@@ -63,22 +116,60 @@ public class CalculatorService {
     }
     
     /**
-     * Performs final damage calculation and attaches statistical analysis (Averages, Ranges, etc.)
+     * Extracts key statistical markers from a probability distribution for the scaling graph.
+     * Calculates the weighted Average, the 10th Percentile (Lower 80% bound), and the 90th Percentile (Upper 80% bound).
+     *
+     * @param toughness The toughness value associated with this distribution.
+     * @param dist The probability distribution array.
+     * @return A node containing the x-axis value (T) and y-axis stats (Avg, Low, High).
+     */
+    private CalculationResultDTO.ToughnessNode extractNodeStats(int toughness, double[] dist) {
+        double avg = 0.0;
+        double sumProb = 0.0;
+        double lower80 = -1.0;
+        double upper80 = -1.0;
+
+        for (int i = 0; i < dist.length; i++) {
+            double p = dist[i];
+            if (p <= 0) continue;
+
+            avg += i * p;
+            sumProb += p;
+
+            // Capture 10th Percentile (Start of the 80% confidence interval)
+            if (lower80 < 0 && sumProb >= 0.10) {
+                lower80 = i;
+            }
+            // Capture 90th Percentile (End of the 80% confidence interval)
+            if (upper80 < 0 && sumProb >= 0.90) {
+                upper80 = i;
+            }
+        }
+        
+        // Edge case handling for extremely narrow distributions (e.g., 100% chance of 0)
+        if (lower80 < 0) lower80 = 0;
+        if (upper80 < 0) upper80 = dist.length - 1;
+
+        return new CalculationResultDTO.ToughnessNode(toughness, avg, lower80, upper80);
+    }
+
+    /**
+     * Finalizes the DTO by calculating damage distributions and enriching the result with statistical metadata.
+     * This method separates the high-precision arrays used for calculation from the rounded lists sent to the frontend.
      */
     private CalculationResultDTO finalizeResults(List<CalculationRequestDTO> requests, double[] hitDist, double[] woundDist) {
         String damageExpression = requests.get(0).getDamageValue();
         double[] damageDist = DamageProcessor.calculateDamageDistribution(woundDist, damageExpression);
 
-        // 1. Create result with hit probabilities (This rounds hitDist)
+        // Initialize result with Hit Probabilities
         CalculationResultDTO result = createBaseResult(hitDist);
         
-        // 2. ENRICH FIRST (High Precision)
-        // These methods calculate averages/confidence intervals using the double[] arrays
+        // Calculate and attach statistical metadata (Averages, Confidence Intervals, etc.)
         DistributionAnalyzer.enrichHits(result, hitDist);
         DistributionAnalyzer.enrichWounds(result, woundDist);
         DistributionAnalyzer.enrichDamage(result, damageDist);
 
-        // 3. ATTACH ROUNDED LISTS LAST
+        // Attach rounded probability lists for frontend charts
         result.setWoundProbabilities(convertToRoundedList(woundDist));
         result.setDamageProbabilities(convertToRoundedList(damageDist));
 
@@ -90,13 +181,17 @@ public class CalculatorService {
     }
 
     /**
-     * Initializes the DTO and handles precision rounding for the API response.
+     * creates an initial Result DTO containing the hit distribution.
      */
     private CalculationResultDTO createBaseResult(double[] distribution) {
         List<Double> roundedProbabilities = convertToRoundedList(distribution);
         return new CalculationResultDTO(roundedProbabilities, distribution.length - 1);
     }
 
+    /**
+     * Converts a raw double array into a List of Doubles rounded to 4 decimal places.
+     * This reduces JSON payload size and handles floating-point artifacts.
+     */
     private List<Double> convertToRoundedList(double[] distribution) {
         return Arrays.stream(distribution)
                 .map(v -> Math.round(v * ROUNDING_PRECISION) / ROUNDING_PRECISION)

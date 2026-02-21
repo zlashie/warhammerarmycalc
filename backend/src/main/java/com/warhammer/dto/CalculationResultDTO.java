@@ -1,6 +1,7 @@
 package com.warhammer.dto;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class CalculationResultDTO {
     // --- Hit Fields ---
@@ -27,9 +28,27 @@ public class CalculationResultDTO {
     private String damageRangeTop5;
     private double damageProbAtLeastAvg;
 
+    // --- Toughness Analysis Fields ---
+    private List<ToughnessNode> toughnessScaling = new ArrayList<>();
+
     public CalculationResultDTO(List<Double> probabilities, int maxHits) {
         this.probabilities = probabilities;
         this.maxHits = maxHits;
+    }
+
+    // --- Graph Data Structure ---
+    public static class ToughnessNode {
+        public int toughness;
+        public double average;
+        public double lower80; 
+        public double upper80; 
+
+        public ToughnessNode(int t, double avg, double low, double high) {
+            this.toughness = t;
+            this.average = avg;
+            this.lower80 = low;
+            this.upper80 = high;
+        }
     }
 
     // --- Hit Getters and Setters ---
@@ -73,4 +92,8 @@ public class CalculationResultDTO {
     public void setDamageRangeTop5(String damageRangeTop5) { this.damageRangeTop5 = damageRangeTop5; }
     public double getDamageProbAtLeastAvg() { return damageProbAtLeastAvg; }
     public void setDamageProbAtLeastAvg(double damageProbAtLeastAvg) { this.damageProbAtLeastAvg = damageProbAtLeastAvg; }
+
+    // --- Toughness Analysis Getters and Setters ---
+    public List<ToughnessNode> getToughnessScaling() { return toughnessScaling; }
+    public void setToughnessScaling(List<ToughnessNode> scaling) { this.toughnessScaling = scaling; }
 }

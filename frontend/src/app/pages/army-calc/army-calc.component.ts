@@ -6,6 +6,7 @@ import { LedgerCardComponent } from './components/ledger-card/ledger-card.compon
 import { HitDistCardComponent } from './components/hit-dist-card/hit-dist-card.component';
 import { WoundDistCardComponent } from './components/wound-dist-card/wound-dist-card.component';
 import { DamageDistCardComponent } from './components/damage-dist-card.component/damage-dist-card.component';
+import { ToughnessDistCardComponent } from './components/toughness-dist-card.component/toughness-dist-card.component';
 import { ArmyStoreService } from './services/army-store.service'; 
 import { ArmyMapper } from './utils/army.mapper';                
 
@@ -18,7 +19,8 @@ import { ArmyMapper } from './utils/army.mapper';
     LedgerCardComponent, 
     HitDistCardComponent,
     WoundDistCardComponent,
-    DamageDistCardComponent
+    DamageDistCardComponent,
+    ToughnessDistCardComponent
   ],
   templateUrl: './army-calc.component.html',
   styleUrls: ['./army-calc.component.css']
@@ -71,7 +73,7 @@ export class ArmyCalcComponent {
     this.store.upsertUnit(unit); 
     this.store.selectedUnit.set(unit); 
   }
-  
+
   removeUnit(id: number) { this.store.removeUnit(id); }
   onEditUnit(unit: any | null) { this.store.selectedUnit.set(unit); }
 }

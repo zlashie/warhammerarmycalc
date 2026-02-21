@@ -10,6 +10,7 @@ export class ArmyMapper {
         numberOfModels: parseInt(unit.stats.models) || 0,
         attacksPerModel: parseInt(unit.stats.attacks) || 0,
         bsValue: parseInt(unit.stats.bsWs?.replace('+', '')) || 0,
+        strength: parseInt(unit.stats.strength) || 4,
         damageValue: unit.stats.damage || "1",
         lethalHits: !!unit.toggles.lethal,
         sustainedHits: !!sActive,
