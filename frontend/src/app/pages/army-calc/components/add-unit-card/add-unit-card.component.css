@@ -30,6 +30,13 @@
     width: 100%;
 }
 
+.vertical-divider {
+    border-left: 1px solid #e0e0e0; 
+    margin: 0 20px;                 
+    height: auto;                   
+    align-self: stretch;           
+}
+
 .stat-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr); 
@@ -41,9 +48,30 @@
 
 .toggle-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 5px; 
+    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
+    grid-template-rows: repeat(2, auto);
+    gap: 15px 5px;
     margin-top: 10px;
+    align-items: center;
+    grid-template-areas: 
+        "t1 d1 t2 d2 t3 d3 t4 d4 t5"
+        "b1 d1 b2 d2 b3 d3 b4 d4 b5";
+}
+
+.t1 { grid-area: t1; } .b1 { grid-area: b1; }
+.t2 { grid-area: t2; } .b2 { grid-area: b2; }
+.t3 { grid-area: t3; } .b3 { grid-area: b3; }
+.t4 { grid-area: t4; } .b4 { grid-area: b4; }
+.t5 { grid-area: t5; } .b5 { grid-area: b5; }
+
+.div1 { grid-area: d1; } .div2 { grid-area: d2; }
+.div3 { grid-area: d3; } .div4 { grid-area: d4; }
+
+.vertical-divider.grid-style {
+    border-left: 1px solid #e0e0e0;
+    margin: 0 10px;
+    height: 100%;
+    align-self: stretch;
 }
 
 .identity-row {

@@ -34,87 +34,29 @@
 
     <hr class="card-divider">
 
-    <div class="toggle-grid">
+      <div class="toggle-grid">
+          <app-toggle-orb class="t1" label="Torrent" abbreviation="TR" icon="mode_heat" [(active)]="currentUnit.toggles.torrent"></app-toggle-orb>
+          <app-toggle-orb class="b1" label="Lethal Hits" abbreviation="LH" icon="swords" [(active)]="currentUnit.toggles.lethal"></app-toggle-orb>
 
-      <app-toggle-orb 
-        label="Lethal Hits" 
-        abbreviation="LH" 
-        icon="swords"
-        [(active)]="currentUnit.toggles.lethal">
-      </app-toggle-orb>
+          <div class="vertical-divider grid-style div1"></div>
 
-      <app-toggle-orb 
-        label="Hit" 
-        abbreviation="+1" 
-        icon="exposure_plus_1"
-        [(active)]="currentUnit.toggles.plusOneHit">
-      </app-toggle-orb>
+          <app-toggle-orb class="t2" label="Hit" abbreviation="+1" icon="exposure_plus_1" [(active)]="currentUnit.toggles.plusOneHit"></app-toggle-orb>
+          <app-toggle-orb class="b2" label="Wound" abbreviation="+1" icon="exposure_plus_1" [(active)]="currentUnit.toggles.plusOneWound"></app-toggle-orb>
 
-      <app-toggle-orb 
-        abbreviation="S" 
-        label="Sustained" 
-        icon="my_location"
-        [options]="['1', '2', '3', 'D3']" 
-        [(active)]="currentUnit.toggles.sustained">
-      </app-toggle-orb>
+          <div class="vertical-divider grid-style div2"></div>
 
-      <app-toggle-orb 
-        label="Crit" 
-        abbreviation="CH"
-        icon="explosion"
-        [options]="['4+', '5+']"
-        [active]="getCritLabel(currentUnit.toggles.crit)"
-        (activeChange)="setCritFromFriendly($event)">
-      </app-toggle-orb>
+          <app-toggle-orb class="t3" label="Sustained" abbreviation="S" icon="my_location" [options]="['1', '2', '3', 'D3']" [(active)]="currentUnit.toggles.sustained"></app-toggle-orb>
+          <app-toggle-orb class="b3" label="Dev Wounds" abbreviation="DW" icon="water_drop" [(active)]="currentUnit.toggles.devastating"></app-toggle-orb>
 
-      <app-toggle-orb 
-        label="Reroll Hits" 
-        abbreviation="RH"
-        icon="refresh"
-        [options]="['1s', 'Fail', 'Fish']"
-        [active]="getFriendlyRerollLabel(currentUnit.toggles.rerollHits)"
-        (activeChange)="setRerollFromFriendly($event)">
-      </app-toggle-orb>
+          <div class="vertical-divider grid-style div3"></div>
 
-      <app-toggle-orb 
-        label="Torrent" 
-        abbreviation="TR" 
-        icon="mode_heat"
-        [(active)]="currentUnit.toggles.torrent">
-      </app-toggle-orb>
+          <app-toggle-orb class="t4" label="Crit" abbreviation="CH" icon="explosion" [options]="['4+', '5+']" [active]="getCritLabel(currentUnit.toggles.crit)" (activeChange)="setCritFromFriendly($event)"></app-toggle-orb>
+          <app-toggle-orb class="b4" label="Anti-X" abbreviation="AX" icon="skull" [options]="['2+', '3+', '4+', '5+']" [active]="getCritLabel(currentUnit.toggles.antiX)" (activeChange)="setAntiXFromFriendly($event)"></app-toggle-orb>
 
-      <app-toggle-orb 
-        label="Wound" 
-        abbreviation="+1" 
-        icon="exposure_plus_1"
-        [(active)]="currentUnit.toggles.plusOneWound">
-      </app-toggle-orb>
+          <div class="vertical-divider grid-style div4"></div>
 
-      <app-toggle-orb
-        label="Dev Wounds"
-        abbreviation="DW"
-        icon="water_drop"
-        [(active)]="currentUnit.toggles.devastating">
-      </app-toggle-orb>
-
-      <app-toggle-orb 
-        label="Anti-X" 
-        abbreviation="AX"
-        icon="skull"
-        [options]="['2+', '3+', '4+', '5+']"
-        [active]="getCritLabel(currentUnit.toggles.antiX)"
-        (activeChange)="setAntiXFromFriendly($event)">
-      </app-toggle-orb>
-
-      <app-toggle-orb 
-        abbreviation="RW" 
-        label="Reroll Wounds" 
-        icon="refresh"
-        [options]="['1s', 'Fail', 'Fish']"
-        [active]="getFriendlyWoundRerollLabel(currentUnit.toggles.rerollWounds)"
-        (activeChange)="setWoundRerollFromFriendly($event)">
-      </app-toggle-orb>
-
+          <app-toggle-orb class="t5" label="Reroll Hits" abbreviation="RH" icon="refresh" [options]="['1s', 'Fail', 'Fish']" [active]="getFriendlyRerollLabel(currentUnit.toggles.rerollHits)" (activeChange)="setRerollFromFriendly($event)"></app-toggle-orb>
+          <app-toggle-orb class="b5" label="Reroll Wounds" abbreviation="RW" icon="refresh" [options]="['1s', 'Fail', 'Fish']" [active]="getFriendlyWoundRerollLabel(currentUnit.toggles.rerollWounds)" (activeChange)="setWoundRerollFromFriendly($event)"></app-toggle-orb>
+      </div>
     </div>
-  </div>
 </app-card>
