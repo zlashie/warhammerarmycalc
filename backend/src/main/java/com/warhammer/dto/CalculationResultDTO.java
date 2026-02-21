@@ -31,6 +31,9 @@ public class CalculationResultDTO {
     // --- Toughness Analysis Fields ---
     private List<ToughnessNode> toughnessScaling = new ArrayList<>();
 
+    // --- Damage Analysis Fields ---
+    private List<SaveNode> saveScaling = new ArrayList<>();
+
     public CalculationResultDTO(List<Double> probabilities, int maxHits) {
         this.probabilities = probabilities;
         this.maxHits = maxHits;
@@ -45,6 +48,20 @@ public class CalculationResultDTO {
 
         public ToughnessNode(int t, double avg, double low, double high) {
             this.toughness = t;
+            this.average = avg;
+            this.lower80 = low;
+            this.upper80 = high;
+        }
+    }
+
+    public static class SaveNode {
+        public String saveLabel; 
+        public double average;
+        public double lower80;
+        public double upper80;
+
+        public SaveNode(String label, double avg, double low, double high) {
+            this.saveLabel = label;
             this.average = avg;
             this.lower80 = low;
             this.upper80 = high;
@@ -96,4 +113,8 @@ public class CalculationResultDTO {
     // --- Toughness Analysis Getters and Setters ---
     public List<ToughnessNode> getToughnessScaling() { return toughnessScaling; }
     public void setToughnessScaling(List<ToughnessNode> scaling) { this.toughnessScaling = scaling; }
+
+    // --- Damage Analysis Getters and Setters ---
+    public List<SaveNode> getSaveScaling() { return saveScaling; }
+    public void setSaveScaling(List<SaveNode> saveScaling) { this.saveScaling = saveScaling; }
 }

@@ -228,4 +228,60 @@ class CalculatorServiceSpec extends Specification {
         and: "Expected Wounds: 6.6667 * (4/6) = 4.4444"
         Math.abs(result.woundAvgValue - 4.4444) < 0.001
     }
+
+    def "calculateArmyHits should correctly populate Save Scaling graph data"() {
+        given: "A standard unit (10 attacks, 3+ hit, 4+ wound, 1 damage, AP 0)"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 10, bsValue: 3, 
+            strength: 4, ap: 0, damageValue: "1"
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "The save scaling list should contain exactly 6 nodes (2+ through 7/None)"
+        result.saveScaling.size() == 6
+        result.saveScaling[0].saveLabel == "2+"
+        result.saveScaling[5].saveLabel == "None"
+
+        and: "Against 'None' (index 5), average damage should equal average wounds (~3.33)"
+        Math.abs(result.saveScaling[5].average - 3.3333) < 0.01
+        
+        and: "Against a 2+ save (index 0), average damage should be roughly 1/6th of total (~0.55)"
+        Math.abs(result.saveScaling[0].average - 0.5555) < 0.01
+    }
+
+    def "Save Scaling should correctly respect AP"() {
+        given: "A high AP unit (10 attacks, 3+ hit, 4+ wound, 1 damage, AP -3)"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 10, bsValue: 3, 
+            strength: 4, ap: 3, damageValue: "1"
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "Against a 2+ save, AP -3 forces a 5+ save (50% fail chance)"
+        // Math: 10 * 4/6 (hits) * 1/2 (wounds) * 4/6 (failed 5+ saves) = 2.222
+        Math.abs(result.saveScaling[0].average - 2.2222) < 0.01
+        
+        and: "Against a 4+ save, AP -3 makes it impossible (None/7+)"
+        // Math: 10 * 4/6 * 1/2 * 1.0 (fail chance) = 3.3333
+        Math.abs(result.saveScaling[2].average - 3.3333) < 0.01
+    }
+
+    def "Save Scaling should ensure a 1 always fails regardless of AP"() {
+        given: "A unit with high AP but the target has a 2+ save"
+
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 6, bsValue: 2, 
+            strength: 4, ap: 10, damageValue: "1"
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "At AP -10, even a 2+ save profile should take max damage (relative to the T4 wounding baseline)"
+        Math.abs(result.saveScaling[0].average - 2.5) < 0.01
+    }
 }

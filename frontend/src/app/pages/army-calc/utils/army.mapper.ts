@@ -11,6 +11,7 @@ export class ArmyMapper {
         attacksPerModel: parseInt(unit.stats.attacks) || 0,
         bsValue: parseInt(unit.stats.bsWs?.replace('+', '')) || 0,
         strength: parseInt(unit.stats.strength) || 4,
+        ap: parseInt(unit.stats.ap) || 0,
         damageValue: unit.stats.damage || "1",
         lethalHits: !!unit.toggles.lethal,
         sustainedHits: !!sActive,

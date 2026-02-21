@@ -69,7 +69,6 @@ public class CalculatorService {
             double[] iterationArmyWounds = INITIAL_STATE;
 
             for (int i = 0; i < requests.size(); i++) {
-                // Determine the required wound roll (2+, 3+, 4+, 5+, 6+) for this specific unit vs Toughness 't'
                 int requiredRoll = getWoundRoll(requests.get(i).getStrength(), t);
                 
                 double[] unitWounds = calculateUnitWounds(allUnitHits.get(i), requiredRoll, requests.get(i));
@@ -80,6 +79,30 @@ public class CalculatorService {
         }
 
         result.setToughnessScaling(scalingData);
+
+        // 4. SAVE SCALING PIPELINE (Trend Analysis)
+        List<CalculationResultDTO.SaveNode> saveScalingData = new ArrayList<>();
+
+        for (int s = 2; s <= 7; s++) {
+            double[] iterationArmyDamage = INITIAL_STATE;
+
+            for (CalculationRequestDTO request : requests) {
+                HitResult unitHits = HitProcessor.calculateUnitDistribution(request);
+                double[] unitWounds = calculateUnitWounds(unitHits, 4, request);
+
+                double failProb = calculateFailProbability(s, request.getAp());
+                double[] unsavedWounds = applySave(unitWounds, failProb);
+
+                double[] unitDamage = DamageProcessor.calculateDamageDistribution(unsavedWounds, request.getDamageValue());
+                iterationArmyDamage = ProbabilityMath.convolve(iterationArmyDamage, unitDamage);
+            }
+
+            String label = s > 6 ? "None" : s + "+";
+            saveScalingData.add(extractSaveNodeStats(label, iterationArmyDamage));
+        }
+
+        result.setSaveScaling(saveScalingData);
+        
         return result;
     }
 
@@ -102,6 +125,44 @@ public class CalculatorService {
     }
 
     /**
+     * Implements 10th Ed Save Logic:
+     * 1 is always a fail. AP modifies the save requirement.
+     */
+    private double calculateFailProbability(int baseSave, int ap) {
+        if (baseSave > 6) return 1.0; 
+        
+        int modifiedSave = baseSave + ap; 
+        
+        if (modifiedSave > 6) return 1.0; 
+        if (modifiedSave < 2) modifiedSave = 2;
+        
+        return (modifiedSave - 1) / 6.0;
+    }
+
+    /**
+     * Convolves wound distribution with save failure chance to get unsaved wounds.
+     */
+    private double[] applySave(double[] woundDist, double failProb) {
+        double[] singleWoundOutcome = {1.0 - failProb, failProb}; 
+        
+        double[] totalUnsavedDist = new double[woundDist.length];
+        double[] currentUnsavedDist = {1.0};
+
+        for (int w = 0; w < woundDist.length; w++) {
+            double prob = woundDist[w];
+            if (prob > 0.0000001) {
+                for (int i = 0; i < currentUnsavedDist.length; i++) {
+                    totalUnsavedDist[i] += currentUnsavedDist[i] * prob;
+                }
+            }
+            if (w < woundDist.length - 1) {
+                currentUnsavedDist = ProbabilityMath.convolve(currentUnsavedDist, singleWoundOutcome);
+            }
+        }
+        return totalUnsavedDist;
+    }
+
+    /**
      * Transforms a unit's hit distribution into a wound distribution.
      * Merges "Lethal Hits" (which bypass the wound roll) with standard hits that successfully roll to wound.
      */
@@ -119,11 +180,21 @@ public class CalculatorService {
      * Extracts key statistical markers from a probability distribution for the scaling graph.
      * Calculates the weighted Average, the 10th Percentile (Lower 80% bound), and the 90th Percentile (Upper 80% bound).
      *
-     * @param toughness The toughness value associated with this distribution.
+     * @param toughness/save The toughness value associated with this distribution.
      * @param dist The probability distribution array.
      * @return A node containing the x-axis value (T) and y-axis stats (Avg, Low, High).
      */
     private CalculationResultDTO.ToughnessNode extractNodeStats(int toughness, double[] dist) {
+        double[] stats = calculateStats(dist);
+        return new CalculationResultDTO.ToughnessNode(toughness, stats[0], stats[1], stats[2]);
+    }
+
+    private CalculationResultDTO.SaveNode extractSaveNodeStats(String label, double[] dist) {
+        double[] stats = calculateStats(dist);
+        return new CalculationResultDTO.SaveNode(label, stats[0], stats[1], stats[2]);
+    }
+
+    private double[] calculateStats(double[] dist) {
         double avg = 0.0;
         double sumProb = 0.0;
         double lower80 = -1.0;
@@ -131,26 +202,19 @@ public class CalculatorService {
 
         for (int i = 0; i < dist.length; i++) {
             double p = dist[i];
-            if (p <= 0) continue;
+            if (p <= 0.0000001) continue;
 
             avg += i * p;
             sumProb += p;
 
-            // Capture 10th Percentile (Start of the 80% confidence interval)
-            if (lower80 < 0 && sumProb >= 0.10) {
-                lower80 = i;
-            }
-            // Capture 90th Percentile (End of the 80% confidence interval)
-            if (upper80 < 0 && sumProb >= 0.90) {
-                upper80 = i;
-            }
+            if (lower80 < 0 && sumProb >= 0.10) lower80 = i;
+            if (upper80 < 0 && sumProb >= 0.90) upper80 = i;
         }
         
-        // Edge case handling for extremely narrow distributions (e.g., 100% chance of 0)
         if (lower80 < 0) lower80 = 0;
         if (upper80 < 0) upper80 = dist.length - 1;
 
-        return new CalculationResultDTO.ToughnessNode(toughness, avg, lower80, upper80);
+        return new double[]{avg, lower80, upper80};
     }
 
     /**

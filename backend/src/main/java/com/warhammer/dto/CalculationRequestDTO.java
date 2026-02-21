@@ -6,6 +6,7 @@ public class CalculationRequestDTO {
     private int attacksPerModel;
     private int bsValue;
     private int strength = 4;
+    private int ap;
     private boolean sustainedHits;
     private String sustainedValue;
     private String rerollType;
@@ -34,6 +35,9 @@ public class CalculationRequestDTO {
 
     public int getStrength() { return strength > 0 ? strength : 4; }
     public void setStrength(int strength) { this.strength = strength; }
+
+    public int getAp() { return ap; }
+    public void setAp(int ap) { this.ap = ap; }
 
     public boolean isSustainedHits() { return sustainedHits; }
     public void setSustainedHits(boolean sustainedHits) { this.sustainedHits = sustainedHits; }

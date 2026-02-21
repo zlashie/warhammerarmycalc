@@ -7,21 +7,23 @@ import { HitDistCardComponent } from './components/hit-dist-card/hit-dist-card.c
 import { WoundDistCardComponent } from './components/wound-dist-card/wound-dist-card.component';
 import { DamageDistCardComponent } from './components/damage-dist-card.component/damage-dist-card.component';
 import { ToughnessDistCardComponent } from './components/toughness-dist-card.component/toughness-dist-card.component';
+import { SaveDistCardComponent } from './components/save-dist-card/save-dist-card.component';
 import { ArmyStoreService } from './services/army-store.service'; 
-import { ArmyMapper } from './utils/army.mapper';                
+import { ArmyMapper } from './utils/army.mapper';               
 
 @Component({
   selector: 'app-army-calc',
   standalone: true,
   imports: [
-    CommonModule,  
-    AddUnitCardComponent, 
-    LedgerCardComponent, 
+    CommonModule,
+    AddUnitCardComponent,
+    LedgerCardComponent,
     HitDistCardComponent,
     WoundDistCardComponent,
     DamageDistCardComponent,
-    ToughnessDistCardComponent
-  ],
+    ToughnessDistCardComponent,
+    SaveDistCardComponent
+],
   templateUrl: './army-calc.component.html',
   styleUrls: ['./army-calc.component.css']
 })
