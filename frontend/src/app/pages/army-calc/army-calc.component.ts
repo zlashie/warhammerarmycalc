@@ -1,6 +1,7 @@
 import { Component, signal, inject, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalculatorService, CalcResult } from '../../../core/services/calculator.service';
+import { CardComponent } from '../../shared/components/ui/card/card.component';
 import { AddUnitCardComponent } from './components/add-unit-card/add-unit-card.component';
 import { LedgerCardComponent } from './components/ledger-card/ledger-card.component';
 import { HitDistCardComponent } from './components/hit-dist-card/hit-dist-card.component';
@@ -16,6 +17,7 @@ import { ArmyMapper } from './utils/army.mapper';
   standalone: true,
   imports: [
     CommonModule,
+    CardComponent,
     AddUnitCardComponent,
     LedgerCardComponent,
     HitDistCardComponent,

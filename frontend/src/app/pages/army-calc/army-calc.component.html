@@ -1,28 +1,58 @@
-<div class="grid-container">
-    <div class="units-column">
-        <app-add-unit-card 
-            [unitToEdit]="editingUnit()" 
-            (unitAdded)="onSaveUnit($event)">
-        </app-add-unit-card>
+<div class="page-wrapper">
+    <div class="info-row">
+        <app-card>
+            <div class="info-content">
+                <h1 class="main-title">Calculator</h1>
+                <hr class="card-divider">
+                <div class="description-text">
+                    <p>
+                        This calculator is made with the purpose of gaining an overall understanding 
+                        of your 2000p 10th edition Warhammer army, given an ideal boardstate. 
+                        It answers the question "How does my army perform, if I get a turn where I
+                        have 100% unit activations."
+                    </p>
+                    
+                    <p>
+                        There are some assumptions made to be able to generalize for this hollistic 
+                        purpose. First, the wound distribution is done on a baseline of 4+, supplied
+                        with a toughness distribution to see how different targets affect your 
+                        units wound output. Similarly, the damage distribution is before saves, supplied 
+                        with a save distribution to see how different targets affect your units 
+                        damage output.
+                    </p>
 
-        <app-ledger-card 
-            [units]="armyUnits() || []" 
-            [activeUnit]="editingUnit()" 
-            [totalPoints]="totalPoints()"
-            (editUnit)="onEditUnit($event)"
-            (deleteUnit)="removeUnit($event)">
-        </app-ledger-card>
+                    <p>
+                        Overall, this analytical tool should help you understand better how your army performs, 
+                        generally speaking, versus different target profiles, instead of relying on silver bullets
+                        against usually feared targets such as Land Raiders, C'tans, Deathwing knights etc. 
+                    </p>
+                </div>
+            </div>
+        </app-card>
     </div>
 
-    <div class="results-column">
-        <app-hit-dist-card></app-hit-dist-card>
+    <div class="grid-container">
+        <div class="units-column">
+            <app-add-unit-card 
+                [unitToEdit]="editingUnit()" 
+                (unitAdded)="onSaveUnit($event)">
+            </app-add-unit-card>
 
-        <app-wound-dist-card></app-wound-dist-card>
+            <app-ledger-card 
+                [units]="armyUnits() || []" 
+                [activeUnit]="editingUnit()" 
+                [totalPoints]="totalPoints()"
+                (editUnit)="onEditUnit($event)"
+                (deleteUnit)="removeUnit($event)">
+            </app-ledger-card>
+        </div>
 
-        <app-toughness-dist-card></app-toughness-dist-card>
-
-        <app-damage-dist-card></app-damage-dist-card>
-
-        <app-save-dist-card></app-save-dist-card>
+        <div class="results-column">
+            <app-hit-dist-card></app-hit-dist-card>
+            <app-wound-dist-card></app-wound-dist-card>
+            <app-toughness-dist-card></app-toughness-dist-card>
+            <app-damage-dist-card></app-damage-dist-card>
+            <app-save-dist-card></app-save-dist-card>
+        </div>
     </div>
 </div>
