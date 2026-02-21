@@ -17,6 +17,7 @@ export class ArmyMapper {
         sustainedHits: !!sActive,
         sustainedValue: typeof sActive === 'string' ? sActive : (sActive ? "1" : "0"),
         rerollType: typeof rerollValue === 'string' ? rerollValue : "NONE",
+        torrent: !!unit.toggles.torrent,
         critHitValue: unit.toggles.crit || 6,
         woundRerollType: typeof rerollWounds === 'string' ? rerollWounds : "NONE",
         devastatingWounds: !!unit.toggles.devastating,

@@ -280,4 +280,25 @@ class HitProcessorSpec extends Specification {
         then: "It treats '10' as a flat value. EV = 10 * 0.5 = 5.0"
         Math.abs(averageHits - 5.0) < 0.0001
     }
+
+    def "Torrent should result in 100% hit rate regardless of BS value"() {
+        given: "A unit with a very poor BS (6+) but the Torrent keyword active"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 1, 
+            attacksPerModel: "6", 
+            bsValue: 6,
+            torrent: true
+        )
+
+        when: "Calculating the unit distribution"
+        HitResult result = HitProcessor.calculateUnitDistribution(request)
+
+        double totalAvgHits = result.getTotalVisualHits().indexed().collect { i, p -> i * p }.sum()
+
+        then: "Every attack should result in a hit (6 attacks = 6 expected hits)"
+        Math.abs(totalAvgHits - 6.0) < 0.0001
+        
+        and: "The probability of getting exactly 6 hits is 1.0 (100%)"
+        Math.abs(result.getTotalVisualHits()[6] - 1.0) < 0.0001
+    }
 }

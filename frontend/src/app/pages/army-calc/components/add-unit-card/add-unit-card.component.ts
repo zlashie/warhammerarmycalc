@@ -60,7 +60,8 @@ export class AddUnitCardComponent {
         antiX: 6,         
         devastating: false,
         plusOneHit: false,
-        plusOneWound: false   
+        plusOneWound: false,
+        torrent: false   
       }
     };
   }

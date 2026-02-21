@@ -198,7 +198,7 @@ public class HitProcessor {
     private static void processDiceFace(int face, double[] std, double[] lethal, double[] total, CalculationRequestDTO req, double prob) {
         boolean isCrit = face >= req.getCritHitValue();
         int effectiveRoll = req.isPlusOneToHit() ? face + 1 : face;
-        boolean isHit = effectiveRoll >= req.getBsValue() && face != 1;
+        boolean isHit = req.isTorrent() || (effectiveRoll >= req.getBsValue() && face != 1);
 
         if (isCrit && req.isLethalHits()) {
             lethal[1] += prob;

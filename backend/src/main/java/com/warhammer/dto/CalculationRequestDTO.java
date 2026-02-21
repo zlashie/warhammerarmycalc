@@ -18,6 +18,7 @@ public class CalculationRequestDTO {
     private boolean devastatingWounds;
     private boolean plusOneToHit;
     private boolean plusOneToWound;
+    private boolean torrent;
 
     public CalculationRequestDTO() {}
 
@@ -71,4 +72,7 @@ public class CalculationRequestDTO {
     
     public boolean isPlusOneToWound() { return plusOneToWound; }
     public void setPlusOneToWound(boolean plusOneToWound) { this.plusOneToWound = plusOneToWound; }
+
+    public boolean isTorrent() { return torrent; }
+    public void setTorrent(boolean torrent) { this.torrent = torrent; }
 }
