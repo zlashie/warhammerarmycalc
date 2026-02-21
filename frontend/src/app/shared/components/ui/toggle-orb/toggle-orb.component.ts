@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 export class ToggleOrbComponent {
   @Input({ required: true }) label: string = '';
   @Input({ required: true }) abbreviation: string = '';
+  @Input() icon: string = '';
   @Input() options: string[] = []; 
   @Input() active: any = false; 
   

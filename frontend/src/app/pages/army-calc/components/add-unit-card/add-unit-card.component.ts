@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, input, effect } from '@angular/core'; 
+import { Component, Output, EventEmitter, input, Input, effect } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { ActionOrbComponent } from '../../../../shared/components/ui/action-orb/action-orb.component';
 import { CardComponent } from '../../../../shared/components/ui/card/card.component';
@@ -15,6 +15,8 @@ import { ToggleOrbComponent } from '../../../../shared/components/ui/toggle-orb/
 export class AddUnitCardComponent {
   unitToEdit = input<any | null>(null); 
 
+  @Input() mode: 'add' | 'save' | 'delete' = 'add';
+  @Output() action = new EventEmitter<void>();
   @Output() unitAdded = new EventEmitter<any>();
 
   constructor() {
@@ -26,6 +28,19 @@ export class AddUnitCardComponent {
         this.currentUnit = this.getInitialUnitState();
       }
     });
+  }
+
+  getIconName(): string {
+    switch (this.mode) {
+      case 'save': return 'save';
+      case 'delete': return 'delete';
+      case 'add': 
+      default: return 'add';
+    }
+  }
+
+  onClick() {
+    this.action.emit();
   }
 
   private getInitialUnitState() {

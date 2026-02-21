@@ -5,7 +5,7 @@
         {{ unitToEdit() ? 'Edit Unit' : 'Configure New Unit' }}
       </h3>
       <app-action-orb 
-        mode="add" 
+        [mode]="unitToEdit() ? 'save' : 'add'" 
         (action)="submitUnit()">
       </app-action-orb>
     </div>
@@ -39,18 +39,21 @@
       <app-toggle-orb 
         label="Hit" 
         abbreviation="+1" 
+        icon="exposure_plus_1"
         [(active)]="currentUnit.toggles.plusOneHit">
       </app-toggle-orb>
 
       <app-toggle-orb 
         label="Lethal Hits" 
         abbreviation="LH" 
+        icon="swords"
         [(active)]="currentUnit.toggles.lethal">
       </app-toggle-orb>
 
       <app-toggle-orb 
         abbreviation="S" 
         label="Sustained" 
+        icon="my_location"
         [options]="['1', '2', '3', 'D3']" 
         [(active)]="currentUnit.toggles.sustained">
       </app-toggle-orb>
@@ -58,6 +61,7 @@
       <app-toggle-orb 
         label="Crit" 
         abbreviation="CH"
+        icon="explosion"
         [options]="['4+', '5+']"
         [active]="getCritLabel(currentUnit.toggles.crit)"
         (activeChange)="setCritFromFriendly($event)">
@@ -66,6 +70,7 @@
       <app-toggle-orb 
         label="Reroll Hits" 
         abbreviation="RH"
+        icon="refresh"
         [options]="['1s', 'Fail', 'Fish']"
         [active]="getFriendlyRerollLabel(currentUnit.toggles.rerollHits)"
         (activeChange)="setRerollFromFriendly($event)">
@@ -74,18 +79,21 @@
       <app-toggle-orb 
         label="Wound" 
         abbreviation="+1" 
+        icon="exposure_plus_1"
         [(active)]="currentUnit.toggles.plusOneWound">
       </app-toggle-orb>
 
       <app-toggle-orb
         label="Dev Wounds"
         abbreviation="DW"
+        icon="water_drop"
         [(active)]="currentUnit.toggles.devastating">
       </app-toggle-orb>
 
       <app-toggle-orb 
         label="Anti-X" 
         abbreviation="AX"
+        icon="skull"
         [options]="['2+', '3+', '4+', '5+']"
         [active]="getCritLabel(currentUnit.toggles.antiX)"
         (activeChange)="setAntiXFromFriendly($event)">
@@ -94,10 +102,12 @@
       <app-toggle-orb 
         abbreviation="RW" 
         label="Reroll Wounds" 
+        icon="refresh"
         [options]="['1s', 'Fail', 'Fish']"
         [active]="getFriendlyWoundRerollLabel(currentUnit.toggles.rerollWounds)"
         (activeChange)="setWoundRerollFromFriendly($event)">
       </app-toggle-orb>
+
     </div>
   </div>
 </app-card>

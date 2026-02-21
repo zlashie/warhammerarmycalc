@@ -131,3 +131,13 @@
     border-right: 1px solid #e0e0e0;
     border-bottom: 1px solid #e0e0e0;
 }
+
+.material-symbols-rounded {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.orb.active .material-symbols-rounded {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}

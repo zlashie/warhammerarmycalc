@@ -1,9 +1,10 @@
 <button 
   type="button" 
   class="action-orb-button" 
-  [class.remove-mode]="mode === 'remove'"
+  [class.remove-mode]="mode === 'remove' || mode === 'delete'"
+  [class.save-mode]="mode === 'save'"
   (click)="handleAction($event)">
-  <span class="icon-wrapper">
-    {{ mode === 'add' ? '+' : '×' }}
+  <span class="material-symbols-rounded">
+    {{ mode === 'save' ? 'save' : (mode === 'add' ? 'add' : 'delete') }}
   </span>
 </button>

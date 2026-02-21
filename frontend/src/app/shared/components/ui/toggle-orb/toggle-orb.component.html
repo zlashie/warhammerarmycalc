@@ -1,6 +1,14 @@
 <div class="toggle-container">
   <div class="orb" [class.active]="active" (click)="onToggle()">
-    {{ (active && active !== true) ? active : abbreviation }}
+    @if (active && active !== true) {
+      {{ active }}
+    } 
+    @else if (icon) {
+      <span class="material-symbols-rounded">{{ icon }}</span>
+    } 
+    @else {
+      {{ abbreviation }}
+    }
   </div>
   <span class="orb-label" [class.active]="active">{{ label }}</span>
 
