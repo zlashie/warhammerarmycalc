@@ -59,6 +59,7 @@
     transform: translateX(-20px);   
     border-left: 3px solid var(--line-gold); 
     z-index: 10; 
+    background-color: #f0f0f0;
 }
 
 .unit-identity {
@@ -80,20 +81,34 @@
     font-weight: 700;
 }
 
-/* Orb Signature */
-.orb-signature {
-    display: flex;
-    gap: 6px;
-    margin-right: 30px; 
+.orb-signature.ledger-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 14px); 
+    grid-template-rows: repeat(2, 14px);
+    grid-auto-flow: column; 
+    gap: 4px 8px;   
+    align-items: center;
+    margin-right: 30px;
+}
+
+.mini-divider {
+    grid-row: 1 / span 2;
+    border-left: 1px solid #d1d1d1;
+    height: 24px;     
+    margin: 0 4px;   
+    align-self: center;
 }
 
 .mini-indicator {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background-color: #d1d1d1; 
+    background-color: #d1d1d1;
     transition: background-color 0.3s ease;
 }
+
+.t1, .t2, .t3, .t4, .t5 { grid-row: 1; }
+.b1, .b2, .b3, .b4, .b5 { grid-row: 2; }
 
 .mini-indicator.active {
     background-color: #e1ad01; 

@@ -18,20 +18,25 @@
             <span class="unit-name">{{ unit.name || 'Unnamed Unit' }}</span>
           </div>
 
-          <div class="orb-signature">
-            <!-- Hit Modifiers -->
-            <div class="mini-indicator" [class.active]="unit.toggles.lethal"></div>
-            <div class="mini-indicator" [class.active]="unit.toggles.plusOneHit"></div>
-            <div class="mini-indicator" [class.active]="unit.toggles.sustained"></div>
-            <div class="mini-indicator" [class.active]="unit.toggles.crit < 6"></div>
-            <div class="mini-indicator" [class.active]="unit.toggles.rerollHits !== 'NONE'"></div>
-            <div class="mini-indicator" [class.active]="unit.toggles.torrent"></div>
+          <div class="orb-signature ledger-grid">
+            <div class="mini-indicator t1" [class.active]="unit.toggles.torrent"></div>
+            <div class="mini-indicator b1" [class.active]="unit.toggles.lethal"></div>
+            <div class="mini-divider div1"></div>
 
-            <!-- Wound Modifiers -->
-            <div class="mini-indicator" [class.active]="unit.toggles.plusOneWound"></div>
-            <div class="mini-indicator" [class.active]="unit.toggles.devastating"></div>
-            <div class="mini-indicator" [class.active]="unit.toggles.antiX < 6"></div>
-            <div class="mini-indicator" [class.active]="unit.toggles.rerollWounds !== 'NONE'"></div>
+            <div class="mini-indicator t2" [class.active]="unit.toggles.plusOneHit"></div>
+            <div class="mini-indicator b2" [class.active]="unit.toggles.plusOneWound"></div>
+            <div class="mini-divider div2"></div>
+
+            <div class="mini-indicator t3" [class.active]="!!unit.toggles.sustained"></div>
+            <div class="mini-indicator b3" [class.active]="unit.toggles.devastating"></div>
+            <div class="mini-divider div3"></div>
+
+            <div class="mini-indicator t4" [class.active]="unit.toggles.crit < 6"></div>
+            <div class="mini-indicator b4" [class.active]="unit.toggles.antiX < 6"></div>
+            <div class="mini-divider div4"></div>
+
+            <div class="mini-indicator t5" [class.active]="unit.toggles.rerollHits !== 'NONE'"></div>
+            <div class="mini-indicator b5" [class.active]="unit.toggles.rerollWounds !== 'NONE'"></div>
           </div>
 
           <button class="row-delete" (click)="onDelete(unit.id, $event)"></button>
