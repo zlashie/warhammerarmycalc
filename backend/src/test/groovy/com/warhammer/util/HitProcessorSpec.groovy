@@ -201,4 +201,83 @@ class HitProcessorSpec extends Specification {
         and: "The miss probability is 2/6"
         Math.abs(dist[0] - 2/6.0) < 0.000001
     }
+
+    def "calculateUnitDistribution should handle variable attacks D3"() {
+        given: "A single model with D3 attacks hitting on 4+"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 1, 
+            attacksPerModel: "D3", 
+            bsValue: 4
+        )
+
+        when: "The total distribution is calculated"
+        double[] dist = getTotalDist(request)
+        double averageHits = dist.indexed().collect { i, p -> i * p }.sum()
+
+        then: "Average attacks = 2. EV Hits = 2 * 0.5 = 1.0"
+        Math.abs(averageHits - 1.0) < 0.0001
+        
+        and: "The max index with non-zero probability is 3"
+        int lastRealIndex = 0
+        dist.eachWithIndex { val, idx -> if (val > 1e-9) lastRealIndex = idx }
+        lastRealIndex == 3
+    }
+
+    def "calculateUnitDistribution should handle complex attack expressions D6+2"() {
+        given: "A single model with D6+2 attacks hitting on 3+"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 1, 
+            attacksPerModel: "D6+2", 
+            bsValue: 3
+        )
+
+        when:
+        double[] dist = getTotalDist(request)
+        double averageHits = dist.indexed().collect { i, p -> i * p }.sum()
+
+        then: "Average attacks = 5.5. EV Hits = 5.5 * (4/6) = 3.6667"
+        Math.abs(averageHits - 3.66666) < 0.0001
+        
+        and: "The max index with probability is 8 (6+2)"
+        int lastRealIndex = 0
+        dist.eachWithIndex { val, idx -> if (val > 1e-9) lastRealIndex = idx }
+        lastRealIndex == 8
+    }
+
+    def "calculateUnitDistribution should convolve multiple models with variable attacks"() {
+        given: "2 models with D6 attacks hitting on 2+"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 2, 
+            attacksPerModel: "D6", 
+            bsValue: 2
+        )
+
+        when:
+        double[] dist = getTotalDist(request)
+        double averageHits = dist.indexed().collect { i, p -> i * p }.sum()
+
+        then: "Total expected attacks = 7. EV Hits = 7 * (5/6) = 5.8333"
+        Math.abs(averageHits - 5.83333) < 0.0001
+        
+        and: "The max index with probability is 12 (2 * 6)"
+        int lastRealIndex = 0
+        dist.eachWithIndex { val, idx -> if (val > 1e-9) lastRealIndex = idx }
+        lastRealIndex == 12
+    }
+
+    def "calculateUnitDistribution should remain backward compatible with flat integer strings"() {
+        given: "A unit with '10' attacks as a string"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 1, 
+            attacksPerModel: "10", 
+            bsValue: 4
+        )
+
+        when:
+        double[] dist = getTotalDist(request)
+        double averageHits = dist.indexed().collect { i, p -> i * p }.sum()
+
+        then: "It treats '10' as a flat value. EV = 10 * 0.5 = 5.0"
+        Math.abs(averageHits - 5.0) < 0.0001
+    }
 }

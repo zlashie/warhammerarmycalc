@@ -3,7 +3,7 @@ package com.warhammer.dto;
 public class CalculationRequestDTO {
     private String unitName;
     private int numberOfModels;
-    private int attacksPerModel;
+    private String attacksPerModel;
     private int bsValue;
     private int strength = 4;
     private int ap;
@@ -27,8 +27,8 @@ public class CalculationRequestDTO {
     public int getNumberOfModels() { return numberOfModels; }
     public void setNumberOfModels(int numberOfModels) { this.numberOfModels = numberOfModels; }
 
-    public int getAttacksPerModel() { return attacksPerModel; }
-    public void setAttacksPerModel(int attacksPerModel) { this.attacksPerModel = attacksPerModel; }
+    public String getAttacksPerModel() { return (attacksPerModel == null || attacksPerModel.isBlank()) ? "1" : attacksPerModel; }
+    public void setAttacksPerModel(String attacksPerModel) { this.attacksPerModel = attacksPerModel; }
 
     public int getBsValue() { return bsValue; }
     public void setBsValue(int bsValue) { this.bsValue = bsValue; }

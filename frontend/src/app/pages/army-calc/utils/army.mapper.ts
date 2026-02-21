@@ -8,7 +8,7 @@ export class ArmyMapper {
       return {
         unitName: unit.name,
         numberOfModels: parseInt(unit.stats.models) || 0,
-        attacksPerModel: parseInt(unit.stats.attacks) || 0,
+        attacksPerModel: unit.stats.attacks || "1",
         bsValue: parseInt(unit.stats.bsWs?.replace('+', '')) || 0,
         strength: parseInt(unit.stats.strength) || 4,
         ap: parseInt(unit.stats.ap) || 0,
