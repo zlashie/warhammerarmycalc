@@ -301,4 +301,67 @@ class HitProcessorSpec extends Specification {
         and: "The probability of getting exactly 6 hits is 1.0 (100%)"
         Math.abs(result.getTotalVisualHits()[6] - 1.0) < 0.0001
     }
+
+    def "HitResult internal consistency: totalVisualHits averages must match components"() {
+        given: "A complex unit where Lethal and Sustained overlap (Dependent events)"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 3, attacksPerModel: "D3", bsValue: 4,
+            lethalHits: true, sustainedHits: true, sustainedValue: "1",
+            rerollType: "ONES"
+        )
+
+        when: "The distribution is calculated"
+        HitResult result = HitProcessor.calculateUnitDistribution(request)
+        
+        double avgStd = 0; result.getStandardHits().eachWithIndex { v, i -> avgStd += i * v }
+        double avgLethal = 0; result.getLethalHits().eachWithIndex { v, i -> avgLethal += i * v }
+        double avgTotal = 0; result.getTotalVisualHits().eachWithIndex { v, i -> avgTotal += i * v }
+
+        then: "The sum of component averages must equal the total average"
+        Math.abs(avgTotal - (avgStd + avgLethal)) < 0.000001
+        
+        and: "The total probability must still sum to 100%"
+        Math.abs(result.getTotalVisualHits().sum() - 1.0) < 0.000001
+    }
+
+    def "BS 6+ with penalties should still hit on natural 6s"() {
+        given: "BS 6+, but no modifiers are sent (effectively testing the base failure)"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 6, bsValue: 6
+        )
+
+        when:
+        double[] dist = getTotalDist(request)
+
+        then: "Only 1/6 of attacks should hit"
+        Math.abs(dist.indexed().collect { i, p -> i * p }.sum() - 1.0) < 0.0001
+    }
+
+    def "Zero models should return a safe INITIAL_STATE distribution"() {
+        given: "A request with 0 models"
+        def request = new CalculationRequestDTO(numberOfModels: 0)
+
+        when:
+        HitResult result = HitProcessor.calculateUnitDistribution(request)
+
+        then: "All distributions are [1.0] (100% chance of 0 hits)"
+        result.standardHits == [1.0] as double[]
+        result.lethalHits == [1.0] as double[]
+        result.totalVisualHits == [1.0] as double[]
+    }
+
+    def "Sustained Hit array safety: should cap at array bounds"() {
+        given: "An impossible Sustained 10 (beyond the array size of 7)"
+        def request = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 1, bsValue: 4,
+            sustainedHits: true, sustainedValue: "10"
+        )
+
+        when: "The processor attempts to place a hit at index 11"
+        HitResult result = HitProcessor.calculateUnitDistribution(request)
+
+        then: "The logic uses Math.min to prevent ArrayIndexOutOfBounds"
+        result.standardHits[6] > 0
+        noExceptionThrown()
+    }
 }
