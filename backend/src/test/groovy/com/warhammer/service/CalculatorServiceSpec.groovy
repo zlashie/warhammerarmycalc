@@ -310,4 +310,68 @@ class CalculatorServiceSpec extends Specification {
         and: "Against a 2+ save (index 0), standard wounds are reduced by 5/6, but Devastating are not"
         Math.abs(result.saveScaling[0].average - 1.111) < 0.01
     }
+
+    def "Toughness Scaling should reflect Strength vs Toughness breakpoints"() {
+        given: "A Strength 4 weapon"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 6, bsValue: 2, 
+            strength: 4, damageValue: "1"
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "Breakpoints should be visible in the scaling data"
+        Math.abs(result.toughnessScaling.find { it.toughness == 2 }.average - 4.1666) < 0.1
+        Math.abs(result.toughnessScaling.find { it.toughness == 4 }.average - 2.5) < 0.1
+        Math.abs(result.toughnessScaling.find { it.toughness == 8 }.average - 0.833) < 0.1
+    }
+
+    def "Torrent weapons should hit automatically regardless of BS"() {
+        given: "A unit with Torrent and a terrible BS 6+"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 10, bsValue: 6, 
+            torrent: true
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "Average hits should be exactly 10 (100% hit rate)"
+        result.avgValue == 10.0
+    }
+
+    def "Anti-X should provide consistent wounding regardless of target toughness"() {
+        given: "Strength 1 weapon with Anti-Vehicle 4+ against T12"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 6, bsValue: 2, 
+            strength: 1, critWoundValue: 4
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "The average wounds should reflect a 4+ success (3/6 chance), not a 6+"
+        Math.abs(result.woundAvgValue - 2.5) < 0.01
+    }
+
+    def "Save Scaling should correctly handle armor boundaries with absolute AP"() {
+        given: "A weapon with 6 attacks (5 hits), wounding on 4+ (2.5 wounds), AP -1"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 6, bsValue: 2, 
+            strength: 4, ap: -1, damageValue: "1" 
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "A 2+ save becomes a 3+ save (1/3 failure rate)"
+        Math.abs(result.saveScaling[0].average - 0.8333) < 0.01
+
+        and: "A 6+ save with AP -1 (absolute 1) becomes a 7+ (100% fail rate)"
+        Math.abs(result.saveScaling[4].average - 2.5) < 0.01
+        
+        and: "The 'None' node always shows full damage regardless of AP"
+        Math.abs(result.saveScaling[5].average - 2.5) < 0.01
+    }
 }
