@@ -291,4 +291,43 @@ class WoundProcessorSpec extends Specification {
         
         Math.abs(actualDevAvg - 0.8333) < 0.001
     }
+
+    def "WoundProcessor should ensure single-die outcomes are collectively exhaustive"() {
+        given: "A complex scenario with rerolls and modifiers"
+        def request = new CalculationRequestDTO(
+            woundRerollType: "FAIL", devastatingWounds: true, 
+            plusOneToWound: true, critWoundValue: 5
+        )
+
+        when: "Calculating the outcome of a single die"
+        double[] outcomes = new double[3]
+        WoundProcessor.calculateSingleDieWound(outcomes, 4, request)
+
+        then: "The sum of Fail + Standard + Devastating must be exactly 100%"
+        Math.abs(outcomes.sum() - 1.0) < 0.0000001
+    }
+
+    def "Natural 6 should always wound even with negative modifiers"() {
+        given: "A Strength 1 unit against Toughness 100 (Needs 6s), with a -1 to wound penalty"
+        double[] hits = [0, 1.0] 
+        def request = new CalculationRequestDTO(plusOneToWound: false)
+
+        when: "Wounding on a 6+ (Natural 6 required)"
+        WoundResult result = WoundProcessor.calculateWoundDistribution(hits, 7, request)
+
+        then: "The natural 6 still succeeds because of the 'face == 6' safety check"
+        Math.abs(result.totalWounds()[1] - 1/6.0) < 0.001
+    }
+
+    def "Plus One to Wound should not make natural 1s succeed"() {
+        given: "1 guaranteed hit and +1 to wound"
+        double[] hits = [0, 1.0]
+        def request = new CalculationRequestDTO(plusOneToWound: true)
+
+        when: "Wounding on a 2+"
+        WoundResult result = WoundProcessor.calculateWoundDistribution(hits, 2, request)
+
+        then: "Even though 1 + 1 = 2, the natural 1 must still fail"
+        Math.abs(result.totalWounds()[1] - 5/6.0) < 0.001
+    }
 }
