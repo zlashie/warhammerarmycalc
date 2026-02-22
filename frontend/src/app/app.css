@@ -28,14 +28,14 @@
   height: 100%;
   z-index: -1;
 
-  background-image: url('/warhammer-bg.jpg'); 
+  background-image: url('/warhammer-bg.png'); 
   background-size: cover;
   background-position: center center;
   background-attachment: fixed;
   background-repeat: no-repeat;
 
-  filter: blur(6px) brightness(0.9); 
-  transform: scale(1.05);
+  filter: blur(4px) brightness(0.9); 
+  transform: scale(1.25);
 }
 
 .content-container {

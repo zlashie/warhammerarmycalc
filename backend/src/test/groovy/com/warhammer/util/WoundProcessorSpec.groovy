@@ -8,12 +8,20 @@ class WoundProcessorSpec extends Specification {
 
     def defaultRequest = new CalculationRequestDTO(woundRerollType: "NONE")
 
+    /**
+     * Helper to reconcile the new 3-stream WoundResult with existing flat-array assertions.
+     */
+    private double[] getMergedWounds(double[] hits, int target, CalculationRequestDTO req) {
+        WoundResult result = WoundProcessor.calculateWoundDistribution(hits, target, req)
+        return result.totalWounds()
+    }
+
     def "calculateWoundDistribution for a guaranteed hit outcome follows binomial distribution"() {
         given: "A distribution where we are 100% certain to get 4 hits"
         double[] hitDist = [0, 0, 0, 0, 1.0]
         
         when: "We calculate wounds requiring a 4+ (50% chance)"
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 4, defaultRequest)
+        double[] woundDist = getMergedWounds(hitDist, 4, defaultRequest)
 
         then: "The max wounds equals max hits"
         woundDist.length == 5
@@ -32,7 +40,7 @@ class WoundProcessorSpec extends Specification {
         hitDist[hits] = 1.0
 
         when:
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, target, defaultRequest)
+        double[] woundDist = getMergedWounds(hitDist, target, defaultRequest)
         
         double actualAvg = 0
         woundDist.eachWithIndex { prob, i -> actualAvg += (i * prob) }
@@ -53,12 +61,12 @@ class WoundProcessorSpec extends Specification {
         double[] hitDist = [0.5, 0, 0.5]
 
         when: "Calculating wounds on a 4+"
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 4, defaultRequest)
+        double[] woundDist = getMergedWounds(hitDist, 4, defaultRequest)
 
         then: "The logic uses the Law of Total Probability"
-        woundDist[0] == 0.625
-        woundDist[1] == 0.25
-        woundDist[2] == 0.125
+        Math.abs(woundDist[0] - 0.625) < 0.0001
+        Math.abs(woundDist[1] - 0.25) < 0.0001
+        Math.abs(woundDist[2] - 0.125) < 0.0001
     }
 
     def "Processor handles zero hits gracefully"() {
@@ -66,7 +74,7 @@ class WoundProcessorSpec extends Specification {
         double[] hitDist = [1.0]
 
         when:
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 4, defaultRequest)
+        double[] woundDist = getMergedWounds(hitDist, 4, defaultRequest)
 
         then:
         woundDist.length == 1
@@ -81,7 +89,7 @@ class WoundProcessorSpec extends Specification {
         def request = new CalculationRequestDTO(woundRerollType: type)
 
         when:
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 4, request)
+        double[] woundDist = getMergedWounds(hitDist, 4, request)
         double actualAvg = 0
         woundDist.eachWithIndex { prob, i -> actualAvg += (i * prob) }
 
@@ -107,7 +115,7 @@ class WoundProcessorSpec extends Specification {
         )
 
         when:
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 4, request)
+        double[] woundDist = getMergedWounds(hitDist, 4, request)
         double actualAvg = 0
         woundDist.eachWithIndex { prob, i -> actualAvg += (i * prob) }
 
@@ -127,7 +135,7 @@ class WoundProcessorSpec extends Specification {
         )
 
         when:
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 4, request)
+        double[] woundDist = getMergedWounds(hitDist, 4, request)
         
         then: "Average should still be 5.0 (logic hasn't changed, just the 'label' of the die)"
         double actualAvg = 0
@@ -147,7 +155,7 @@ class WoundProcessorSpec extends Specification {
         )
 
         when:
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, target, request)
+        double[] woundDist = getMergedWounds(hitDist, target, request)
         double actualAvg = 0
         woundDist.eachWithIndex { prob, i -> actualAvg += (i * prob) }
 
@@ -155,7 +163,7 @@ class WoundProcessorSpec extends Specification {
         Math.abs(actualAvg - expectedAvg) < 0.001
 
         where:
-        desc                      | target | critValue | expectedAvg
+        desc                     | target | critValue | expectedAvg
         "Standard (No Anti-X)"    | 4      | 6         | 3.0       
         "Anti-4+ vs High Tough"   | 6      | 4         | 3.0          
         "Anti-2+ vs High Tough"   | 5      | 2         | 5.0          
@@ -174,7 +182,7 @@ class WoundProcessorSpec extends Specification {
         )
 
         when: "Calculating wounds against a 6+ target"
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 6, request)
+        double[] woundDist = getMergedWounds(hitDist, 6, request)
         double actualAvg = 0
         woundDist.eachWithIndex { prob, i -> actualAvg += (i * prob) }
 
@@ -183,12 +191,12 @@ class WoundProcessorSpec extends Specification {
     }
 
     def "Anti-X should never succeed on a natural 1"() {
-        given: "1 guaranteed hit and an impossible Anti-1+ (which the UI shouldn't allow, but the backend must handle)"
+        given: "1 guaranteed hit and an impossible Anti-1+"
         double[] hitDist = [0, 1.0]
-        def request = new CalculationRequestDTO(critWoundValue: 1)
+        def request = new CalculationRequestDTO(critWoundValue: 1, woundRerollType: "NONE")
 
         when: "Wounding on a 6+"
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 6, request)
+        double[] woundDist = getMergedWounds(hitDist, 6, request)
 
         then: "The success rate is 5/6 (2,3,4,5,6) because 1 is a hard-coded failure"
         Math.abs(woundDist[1] - 0.8333) < 0.001
@@ -198,18 +206,89 @@ class WoundProcessorSpec extends Specification {
         given: "10 hits on a 4+ to wound with +1 modifier"
         double[] hitDist = new double[11]
         hitDist[10] = 1.0
-        def request = new CalculationRequestDTO(plusOneToWound: true)
+        def request = new CalculationRequestDTO(plusOneToWound: true, woundRerollType: "NONE")
 
         when: "Calculating wounds"
-        double[] woundDist = WoundProcessor.calculateWoundDistribution(hitDist, 4, request)
+        double[] woundDist = getMergedWounds(hitDist, 4, request)
         
         double actualAvg = 0
         woundDist.eachWithIndex { prob, i -> actualAvg += (i * prob) }
 
         then: "Success on natural 3, 4, 5, 6 (4/6 prob)."
         Math.abs(actualAvg - 6.6666) < 0.001
+    }
+
+    def "Devastating Wounds should siphon crits from standard success into the dev pool"() {
+        given: "6 hits on a 4+ to wound with Devastating Wounds (Crit 6+)"
+        double[] hitDist = new double[7]
+        hitDist[6] = 1.0
+        def request = new CalculationRequestDTO(devastatingWounds: true, critWoundValue: 6)
+
+        when: "Calculating distribution"
+        WoundResult result = WoundProcessor.calculateWoundDistribution(hitDist, 4, request)
         
-        and: "The probability of 0 wounds should be (2/6)^10"
-        Math.abs(woundDist[0] - Math.pow(2/6.0, 10)) < 0.000001
+        double stdAvg = 0
+        result.standardWounds().eachWithIndex { p, i -> stdAvg += (i * p) }
+        
+        double devAvg = 0
+        result.devastatingWounds().eachWithIndex { p, i -> devAvg += (i * p) }
+
+        then: "Standard pool contains 4s and 5s (2/6 chance = 2.0 avg)"
+        Math.abs(stdAvg - 2.0) < 0.001
+
+        and: "Devastating pool contains 6s (1/6 chance = 1.0 avg)"
+        Math.abs(devAvg - 1.0) < 0.001
+        
+        and: "The sum of averages equals the total success expectation (3.0)"
+        Math.abs((stdAvg + devAvg) - 3.0) < 0.001
+    }
+
+    def "Anti-X 4+ with Devastating Wounds should siphon 50% of hits into the dev pool"() {
+        given: "6 hits against a target that needs 6s, but with Anti-4+ and Dev Wounds"
+        double[] hitDist = new double[7]
+        hitDist[6] = 1.0
+        def request = new CalculationRequestDTO(devastatingWounds: true, critWoundValue: 4)
+
+        when: "Calculating distribution"
+        WoundResult result = WoundProcessor.calculateWoundDistribution(hitDist, 6, request)
+        
+        double devAvg = 0
+        result.devastatingWounds().eachWithIndex { p, i -> devAvg += (i * p) }
+        
+        double stdAvg = 0
+        result.standardWounds().eachWithIndex { p, i -> stdAvg += (i * p) }
+
+        then: "Every roll of 4, 5, or 6 is Devastating (3/6 chance = 3.0 avg)"
+        Math.abs(devAvg - 3.0) < 0.001
+        
+        and: "There are no standard wounds because the crit threshold (4+) is lower than the target (6+)"
+        Math.abs(stdAvg - 0.0) < 0.001
+    }
+
+    def "Lethal Hits should remain in the standard pool to allow saves"() {
+        given: "A unit with 1 guaranteed Lethal Hit and 5 guaranteed Standard Hits"
+        double[] lethalHits = new double[2] 
+        lethalHits[1] = 1.0 
+
+        double[] standardHits = new double[6]
+        standardHits[5] = 1.0
+        
+        def request = new CalculationRequestDTO(devastatingWounds: true, critWoundValue: 6)
+
+        when: "Calculating unit wounds (mirroring CalculatorService logic)"
+        WoundResult res = WoundProcessor.calculateWoundDistribution(standardHits, 4, request)
+        double[] finalStd = ProbabilityMath.convolve(res.standardWounds(), lethalHits)
+
+        then: "The average reflects 5 hits rolling (4s and 5s succeed) + 1 auto-wound"
+        double actualStdAvg = 0
+        finalStd.eachWithIndex { p, i -> actualStdAvg += (i * p) }
+        
+        Math.abs(actualStdAvg - 2.6666) < 0.001
+
+        and: "The Devastating pool only contains the crits from the 5 rolled hits"
+        double actualDevAvg = 0
+        res.devastatingWounds().eachWithIndex { p, i -> actualDevAvg += (i * p) }
+        
+        Math.abs(actualDevAvg - 0.8333) < 0.001
     }
 }

@@ -101,15 +101,6 @@ export class AddUnitCardComponent {
     return false; 
   }
 
-  setCritFromFriendly(friendly: any) {
-    const mapping: any = {
-      '4+': 4,
-      '5+': 5
-    };
-    
-    this.currentUnit.toggles.crit = mapping[friendly] || 6;
-  }
-
   getFriendlyWoundRerollLabel(value: string): string {
     const mapping: any = {
       'ONES': '1s',
@@ -128,12 +119,12 @@ export class AddUnitCardComponent {
     this.currentUnit.toggles.rerollWounds = mapping[friendly] || 'NONE';
   }
 
-  setAntiXFromFriendly(friendly: any) {
-    if (!friendly) {
-      this.currentUnit.toggles.antiX = 6;
-    } else {
-      const val = parseInt(friendly.replace('+', ''));
-      this.currentUnit.toggles.antiX = val;
-    }
+  setAntiXFromFriendly(f: any) { this.currentUnit.toggles.antiX = this.parsePlusValue(f, 6); }
+  setCritFromFriendly(f: any) { this.currentUnit.toggles.crit = this.parsePlusValue(f, 6); }
+
+  private parsePlusValue(val: any, fallback: number): number {
+    if (!val) return fallback;
+    const parsed = parseInt(val.toString().replace('+', ''), 10);
+    return isNaN(parsed) ? fallback : parsed;
   }
 }

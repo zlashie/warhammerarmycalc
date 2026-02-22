@@ -292,4 +292,22 @@ class CalculatorServiceSpec extends Specification {
         then: "Both should produce the exact same average damage scaling"
         resPos.saveScaling.collect { it.average } == resNeg.saveScaling.collect { it.average }
     }
+
+    def "Save Scaling should correctly handle the Devastating Wounds damage floor"() {
+        given: "A unit with 6 attacks, 2+ hit, 4+ wound, 1 damage, and Devastating Wounds (Crit 6+)"
+        def unit = new CalculationRequestDTO(
+            numberOfModels: 1, attacksPerModel: 6, bsValue: 2, 
+            strength: 4, ap: 0, damageValue: "1",
+            devastatingWounds: true, critWoundValue: 6
+        )
+
+        when:
+        def result = service.calculateArmyHits([unit])
+
+        then: "Against 'None' (index 5), avg damage is total wounds (0.833 + 1.666 = 2.5)"
+        Math.abs(result.saveScaling[5].average - 2.5) < 0.01
+
+        and: "Against a 2+ save (index 0), standard wounds are reduced by 5/6, but Devastating are not"
+        Math.abs(result.saveScaling[0].average - 1.111) < 0.01
+    }
 }
