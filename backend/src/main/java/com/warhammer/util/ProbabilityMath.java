@@ -2,74 +2,100 @@ package com.warhammer.util;
 
 /**
  * High-performance mathematical engine for probability calculations.
- * Handles the discrete math required to combine independent random events.
+ * Handles discrete math required to combine independent random events 
+ * through convolution and binomial distributions.
  */
 public class ProbabilityMath {
-    private static final double INITIAL_PROBABILITY_SUM = 1.0;
-    private static final int COMBINATION_BASE_CASE = 1;
-    private static final int COMBINATION_IDENTITY_CASE = 0;
+
+    private static final double TOTAL_PROBABILITY_WEIGHT = 1.0;
+    private static final int BASE_COMBINATION_COUNT = 1;
+    private static final int EMPTY_SELECTION = 0;
+    private static final double SIGNIFICANCE_THRESHOLD = 0.0;
 
     /**
      * Combines two independent probability distributions using discrete convolution.
-     * In Warhammer terms: this "adds" two units together to see their combined impact.
-     * @param distA Distribution of the first unit/army
-     * @param distB Distribution of the new unit being added
-     * @return A new array representing the merged probability distribution
+     * In Warhammer terms: this "adds" two units together to see their combined impact,
+     * or adds a new attack's outcomes to an existing hit pool.
+     *
+     * @param existingDistribution The current probability state (e.g., army hits so far).
+     * @param newSourceDistribution The distribution of the new source being added.
+     * @return A merged distribution representing the sum of both independent events.
      */
-    public static double[] convolve(double[] distA, double[] distB) {
-        // The resulting length is always (length A + length B - 1)
-        double[] result = new double[distA.length + distB.length - 1];
+    public static double[] convolve(double[] existingDistribution, double[] newSourceDistribution) {
+        int combinedResultLength = existingDistribution.length + newSourceDistribution.length - 1;
+        double[] combinedDistribution = new double[combinedResultLength];
 
-        for (int i = 0; i < distA.length; i++) {
-            // Optimization: Skip iterations with zero probability
-            if (distA[i] == 0) continue; 
-            
-            for (int j = 0; j < distB.length; j++) {
-                // The probability of getting (i + j) total hits is P(i) * P(j)
-                result[i + j] += distA[i] * distB[j];
+        for (int existingIndex = 0; existingIndex < existingDistribution.length; existingIndex++) {
+            double probabilityOfExistingOutcome = existingDistribution[existingIndex];
+
+            // Optimization: Skip branches that have no mathematical weight
+            if (probabilityOfExistingOutcome <= SIGNIFICANCE_THRESHOLD) {
+                continue;
+            }
+
+            for (int newIndex = 0; newIndex < newSourceDistribution.length; newIndex++) {
+                double probabilityOfNewOutcome = newSourceDistribution[newIndex];
+                int combinedOutcomeValue = existingIndex + newIndex;
+
+                // The probability of both independent outcomes occurring is the product of their probabilities
+                combinedDistribution[combinedOutcomeValue] += (probabilityOfExistingOutcome * probabilityOfNewOutcome);
             }
         }
-        return result;
+        return combinedDistribution;
     }
 
     /**
      * Generates a Binomial Distribution for a set of identical trials.
-     * Suitable for standard attacks where each die has the same chance to hit.
-     * @param n Total number of attacks (trials)
-     * @param p Probability of a single hit (success)
-     * @return Array where index 'k' is the probability of exactly 'k' hits.
+     * Suitable for standard attacks where each die has the same probability to hit/wound.
+     *
+     * @param totalTrials The number of dice being rolled (e.g., number of attacks).
+     * @param successProbability The chance of a single die succeeding (e.g., 0.5 for a 4+).
+     * @return An array where index 'k' represents the probability of achieving exactly 'k' successes.
      */
-    public static double[] calculateBinomial(int n, double p) {
-        double[] distribution = new double[n + 1];
-        
-        for (int k = 0; k <= n; k++) {
-            distribution[k] = calculateBinomialProbability(n, k, p);
+    public static double[] calculateBinomial(int totalTrials, double successProbability) {
+        double[] binomialDistribution = new double[totalTrials + 1];
+
+        for (int successCount = 0; successCount <= totalTrials; successCount++) {
+            binomialDistribution[successCount] = calculateBinomialProbability(totalTrials, successCount, successProbability);
         }
-        return distribution;
+        return binomialDistribution;
     }
 
     /**
-     * Performs the Binomial Formula: P(k) = (n choose k) * p^k * (1-p)^(n-k)
+     * Implements the Binomial Formula: P(k) = (n choose k) * p^k * (1-p)^(n-k)
      */
-    private static double calculateBinomialProbability(int n, int k, double p) {
-        return combinations(n, k) * Math.pow(p, k) * Math.pow(INITIAL_PROBABILITY_SUM - p, n - k);
+    public static double calculateBinomialProbability(int totalTrials, int successCount, double successProbability) {
+        double failureProbability = TOTAL_PROBABILITY_WEIGHT - successProbability;
+        
+        double combinationCount = calculateCombinations(totalTrials, successCount);
+        double probabilityOfSuccesses = Math.pow(successProbability, successCount);
+        double probabilityOfFailures = Math.pow(failureProbability, totalTrials - successCount);
+
+        return combinationCount * probabilityOfSuccesses * probabilityOfFailures;
     }
 
     /**
      * Calculates the number of ways to choose 'k' successes from 'n' trials (nCr).
-     * Implements an iterative approach to prevent integer overflow with large attack counts.
+     * Uses an iterative approach to maintain precision and prevent overflow with high attack counts.
      */
-    private static double combinations(int n, int k) {
-        if (k < COMBINATION_IDENTITY_CASE || k > n) return 0;
-        if (k == COMBINATION_IDENTITY_CASE || k == n) return COMBINATION_BASE_CASE;
-        
-        // Symmetry property: nCr(n, k) == nCr(n, n-k). Using the smaller k speeds up the loop.
-        if (k > n / 2) k = n - k;
-        
-        double result = 1.0;
-        for (int i = 1; i <= k; i++) {
-            result = result * (n - i + 1) / i;
+    public static double calculateCombinations(int totalTrials, int selectionCount) {
+        if (selectionCount < EMPTY_SELECTION || selectionCount > totalTrials) {
+            return 0;
         }
-        return result;
+        if (selectionCount == EMPTY_SELECTION || selectionCount == totalTrials) {
+            return BASE_COMBINATION_COUNT;
+        }
+
+        // Symmetry property optimization: nCr(n, k) == nCr(n, n-k)
+        // We use the smaller selection count to minimize the number of iterations.
+        if (selectionCount > totalTrials / 2) {
+            selectionCount = totalTrials - selectionCount;
+        }
+
+        double totalWaysToArrange = 1.0;
+        for (int i = 1; i <= selectionCount; i++) {
+            totalWaysToArrange = totalWaysToArrange * (totalTrials - i + 1) / i;
+        }
+        return totalWaysToArrange;
     }
 }
