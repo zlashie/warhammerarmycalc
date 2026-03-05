@@ -1,18 +1,62 @@
 package com.warhammer.util
 
 import spock.lang.Specification
-import spock.lang.Tag
 import spock.lang.Title
 import spock.lang.Unroll
 
 /**
  * Technical Specification for the Probability Engine.
- * Validates the discrete mathematics used to simulate Warhammer 40,000 combat phases.
+ * Validates discrete mathematics and defensive guards for Warhammer 40,000 simulations.
  */
 @Title("Probability Math Engine Tests")
 class ProbabilityMathSpec extends Specification {
 
     private static final double TOLERANCE = 0.000001
+
+    // --- Defensive & Guard Logic Tests ---
+
+    @Unroll
+    def "Defensive: convolve should return a neutral distribution for invalid inputs: #desc"() {
+        expect: "The engine to return a single-element array containing 1.0 (0 hits)"
+        // Explicitly cast the expectation to double[] to avoid MissingMethodException
+        ProbabilityMath.convolve(distA as double[], distB as double[]) == [1.0] as double[]
+
+        where:
+        distA | distB | desc
+        null  | [0.5] | "Null existing distribution"
+        [0.5] | null  | "Null new distribution"
+        []    | [0.5] | "Empty existing array"
+        [0.5] | []    | "Empty new array"
+    }
+
+    def "Defensive: calculateBinomial should throw exception for negative trials"() {
+        when: "Trials are negative"
+        ProbabilityMath.calculateBinomial(-1, 0.5)
+
+        then: "An informative exception is thrown"
+        thrown(IllegalArgumentException)
+    }
+
+    @Unroll
+    def "Defensive: calculateBinomial should clamp successProbability: #inputProb"() {
+        when: "Probability is slightly outside the [0, 1] range due to drift"
+        double[] distribution = ProbabilityMath.calculateBinomial(1, inputProb)
+
+        then: "The result is clamped and valid"
+        Math.abs(distribution.sum() - 1.0) < TOLERANCE
+        distribution[expectedIndex] == 1.0
+
+        where:
+        inputProb | expectedIndex
+        1.000001  | 1  // Clamped to 1.0 (Guaranteed success)
+        -0.000001 | 0  // Clamped to 0.0 (Guaranteed failure)
+    }
+
+    def "Defensive: calculateBinomialProbability should return 0 for impossible counts"() {
+        expect: "Out-of-bounds success counts to be handled gracefully"
+        ProbabilityMath.calculateBinomialProbability(10, 11, 0.5) == 0.0
+        ProbabilityMath.calculateBinomialProbability(10, -1, 0.5) == 0.0
+    }
 
     // --- Combination & Selection Logic ---
 
@@ -46,8 +90,6 @@ class ProbabilityMathSpec extends Specification {
 
         then: "The total probability of all outcomes must equal 1.0 (100%)"
         Math.abs(hitDistribution.sum() - 1.0) < TOLERANCE
-        
-        and: "The distribution size must account for outcomes from 0 to N"
         hitDistribution.length == totalAttacks + 1
     }
 
@@ -73,7 +115,7 @@ class ProbabilityMathSpec extends Specification {
 
     def "convolve: should merge two independent attack sources: Coin Flip Analogy"() {
         given: "Two independent single-attack sources with 50% hit chance"
-        double[] attackSourceA = [0.5, 0.5] // Index 0: 50%, Index 1: 50%
+        double[] attackSourceA = [0.5, 0.5]
         double[] attackSourceB = [0.5, 0.5]
 
         when: "Combining the sources into a unified army distribution"

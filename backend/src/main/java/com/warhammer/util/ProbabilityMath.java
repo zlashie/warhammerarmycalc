@@ -1,9 +1,10 @@
 package com.warhammer.util;
 
 /**
- * High-performance mathematical engine for probability calculations.
- * Handles discrete math required to combine independent random events 
- * through convolution and binomial distributions.
+ * A high-performance mathematical engine designed for discrete probability analysis.
+ * This utility provides the core logic for modeling independent random events,
+ * specifically optimized to simulate large-scale combat interactions where
+ * multiple attack sources must be merged into a single outcome distribution.
  */
 public class ProbabilityMath {
 
@@ -13,22 +14,29 @@ public class ProbabilityMath {
     private static final double SIGNIFICANCE_THRESHOLD = 0.0;
 
     /**
-     * Combines two independent probability distributions using discrete convolution.
-     * In Warhammer terms: this "adds" two units together to see their combined impact,
-     * or adds a new attack's outcomes to an existing hit pool.
+     * Merges two independent probability streams into a unified distribution.
+     * In a combat context, this "stacks" independent sources—such as adding a 
+     * character's attacks to a squad's total—to determine their combined impact.
+     * * Defensive: Returns a neutral (0 hits) distribution if inputs are invalid 
+     * or empty to prevent downstream calculation crashes.
      *
      * @param existingDistribution The current probability state (e.g., army hits so far).
-     * @param newSourceDistribution The distribution of the new source being added.
-     * @return A merged distribution representing the sum of both independent events.
+     * @param newSourceDistribution The new source of hits/wounds to be integrated.
+     * @return A consolidated distribution representing the total combined outcomes.
      */
     public static double[] convolve(double[] existingDistribution, double[] newSourceDistribution) {
+        if (existingDistribution == null || existingDistribution.length == 0 ||
+            newSourceDistribution == null || newSourceDistribution.length == 0) {
+            return new double[]{1.0};
+        }
+
         int combinedResultLength = existingDistribution.length + newSourceDistribution.length - 1;
         double[] combinedDistribution = new double[combinedResultLength];
 
         for (int existingIndex = 0; existingIndex < existingDistribution.length; existingIndex++) {
             double probabilityOfExistingOutcome = existingDistribution[existingIndex];
 
-            // Optimization: Skip branches that have no mathematical weight
+            // Branch Pruning: Optimization to skip paths with zero mathematical significance
             if (probabilityOfExistingOutcome <= SIGNIFICANCE_THRESHOLD) {
                 continue;
             }
@@ -37,7 +45,6 @@ public class ProbabilityMath {
                 double probabilityOfNewOutcome = newSourceDistribution[newIndex];
                 int combinedOutcomeValue = existingIndex + newIndex;
 
-                // The probability of both independent outcomes occurring is the product of their probabilities
                 combinedDistribution[combinedOutcomeValue] += (probabilityOfExistingOutcome * probabilityOfNewOutcome);
             }
         }
@@ -45,49 +52,70 @@ public class ProbabilityMath {
     }
 
     /**
-     * Generates a Binomial Distribution for a set of identical trials.
-     * Suitable for standard attacks where each die has the same probability to hit/wound.
+     * Models the outcome of a "bucket of dice" roll where every die has the same success chance.
+     * Maps every possible result—from total failure to maximum success—into a 
+     * weighted probability distribution.
      *
-     * @param totalTrials The number of dice being rolled (e.g., number of attacks).
-     * @param successProbability The chance of a single die succeeding (e.g., 0.5 for a 4+).
-     * @return An array where index 'k' represents the probability of achieving exactly 'k' successes.
+     * @param totalTrials The number of dice being rolled (e.g., total attacks).
+     * @param successProbability The individual chance for a single die to succeed.
+     * @return A distribution where each index represents the probability of that many successes.
+     * @throws IllegalArgumentException if trials are negative or probability is outside [0, 1].
      */
     public static double[] calculateBinomial(int totalTrials, double successProbability) {
+        if (totalTrials < 0) {
+            throw new IllegalArgumentException("Total trials cannot be negative: " + totalTrials);
+        }
+        
+        double clampedProb = Math.max(0.0, Math.min(1.0, successProbability));
+        
         double[] binomialDistribution = new double[totalTrials + 1];
 
         for (int successCount = 0; successCount <= totalTrials; successCount++) {
-            binomialDistribution[successCount] = calculateBinomialProbability(totalTrials, successCount, successProbability);
+            binomialDistribution[successCount] = calculateBinomialProbability(totalTrials, successCount, clampedProb);
         }
         return binomialDistribution;
     }
 
     /**
-     * Implements the Binomial Formula: P(k) = (n choose k) * p^k * (1-p)^(n-k)
+     * Calculates the probability weight for one specific outcome in a dice pool.
+     *
+     * @param totalTrials The total size of the dice pool.
+     * @param successCount The exact number of successful dice being measured.
+     * @param successProbability The likelihood of a single die succeeding.
+     * @return The probability of this exact outcome occurring.
      */
     public static double calculateBinomialProbability(int totalTrials, int successCount, double successProbability) {
+        if (successCount < 0 || successCount > totalTrials) return 0.0;
+        
         double failureProbability = TOTAL_PROBABILITY_WEIGHT - successProbability;
         
         double combinationCount = calculateCombinations(totalTrials, successCount);
         double probabilityOfSuccesses = Math.pow(successProbability, successCount);
         double probabilityOfFailures = Math.pow(failureProbability, totalTrials - successCount);
 
-        return combinationCount * probabilityOfSuccesses * probabilityOfFailures;
+        double result = combinationCount * probabilityOfSuccesses * probabilityOfFailures;
+        
+        return (Double.isNaN(result) || Double.isInfinite(result)) ? 0.0 : result;
     }
 
     /**
-     * Calculates the number of ways to choose 'k' successes from 'n' trials (nCr).
-     * Uses an iterative approach to maintain precision and prevent overflow with high attack counts.
+     * Determines the number of unique ways a specific set of successes can be arranged.
+     * Uses an iterative approach and symmetry checks for numerical stability and performance.
+     *
+     * @param totalTrials The total number of dice in the set.
+     * @param selectionCount The number of successful dice to be arranged.
+     * @return The total count of unique permutations for the given success count.
      */
     public static double calculateCombinations(int totalTrials, int selectionCount) {
         if (selectionCount < EMPTY_SELECTION || selectionCount > totalTrials) {
-            return 0;
+            return 0.0;
         }
+        
         if (selectionCount == EMPTY_SELECTION || selectionCount == totalTrials) {
-            return BASE_COMBINATION_COUNT;
+            return (double) BASE_COMBINATION_COUNT;
         }
 
-        // Symmetry property optimization: nCr(n, k) == nCr(n, n-k)
-        // We use the smaller selection count to minimize the number of iterations.
+        // Optimization: Leverage symmetry nCr(n, k) == nCr(n, n-k)
         if (selectionCount > totalTrials / 2) {
             selectionCount = totalTrials - selectionCount;
         }
@@ -96,6 +124,7 @@ public class ProbabilityMath {
         for (int i = 1; i <= selectionCount; i++) {
             totalWaysToArrange = totalWaysToArrange * (totalTrials - i + 1) / i;
         }
-        return totalWaysToArrange;
+        
+        return Double.isInfinite(totalWaysToArrange) ? Double.MAX_VALUE : totalWaysToArrange;
     }
 }
